@@ -1,44 +1,138 @@
-import Comment from "../models/Comment.js";
+const Comment = require("../models/Comment");
+const Recipe = require("../models/Recipe");
 
-export const getCommentsForRecipe = async (req, res) => {
+// @desc   Add comment to a recipe
+// @route  POST /api/comments/:recipeId
+// @access Private
+const addComment = async (req, res) => {
   try {
-    const comments = await Comment.find({
-      recipeId: req.params.recipeId,
-    }).populate("userId", "username");
-    res.json(comments);
-  } catch (err) {
-    res.status(500).json({ message: "Fetch comments failed." });
-  }
-};
+    const { recipeId } = req.params;
+    const { content, parentComment } = req.body;
 
-export const addComment = async (req, res) => {
-  try {
-    const { text } = req.body;
-    const comment = new Comment({
-      recipeId: req.params.recipeId,
-      userId: req.user._id,
-      text,
+    // Ensure recipe exists
+    const recipe = await Recipe.findById(recipeId);
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
+
+    const comment = await Comment.create({
+      recipe: recipeId,
+      author: req.user._id,
+      content,
+      parentComment: parentComment || null,
     });
-    await comment.save();
+
+    await comment.populate("author", "name profileImageUrl");
     res.status(201).json(comment);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Add comment failed." });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to add comment", error: error.message });
   }
 };
 
-export const deleteComment = async (req, res) => {
+// @desc   Get all comments
+// @route  GET /api/comments
+// @access Public
+const getAllComments = async (req, res) => {
   try {
-    const comment = await Comment.findById(req.params.commentId);
-    if (!comment)
-      return res.status(404).json({ message: "Comment not found." });
-    if (comment.userId.toString() !== req.user._id.toString())
-      return res.status(403).json({ message: "Unauthorized." });
+    // Fetch all comments with author populated
+    const comments = await Comment.find()
+      .populate("author", "name profileImageUrl")
+      .populate("recipe", "title coverImageUrl")
+      .sort({ createdAt: 1 });
 
-    await comment.deleteOne();
-    res.json({ message: "Comment deleted." });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Delete comment failed." });
+    const commentMap = {};
+    comments.forEach((comment) => {
+      comment = comment.toObject();
+      comment.replies = [];
+      commentMap[comment._id] = comment;
+    });
+
+    const nestedComments = [];
+    comments.forEach((comment) => {
+      if (comment.parentComment) {
+        const parent = commentMap[comment.parentComment];
+        if (parent) {
+          parent.replies.push(commentMap[comment._id]);
+        }
+      } else {
+        nestedComments.push(commentMap[comment._id]);
+      }
+    });
+    res.json(nestedComments);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch all comment", error: error.message });
   }
+};
+
+// @desc   Get all comments for a specific recipe
+// @route  GET /api/comments/:recipeId
+// @access Public
+const getCommentsByRecipe = async (req, res) => {
+  try {
+    const { recipeId } = req.params;
+
+    const comments = await Comment.find({ recipe: recipeId })
+      .populate("author", "name profileImageUrl")
+      .populate("recipe", "title coverImageUrl")
+      .sort({ createdAt: 1 });
+
+    const commentMap = {};
+    comments.forEach((comment) => {
+      comment = comment.toObject();
+      comment.replies = [];
+      commentMap[comment._id] = comment;
+    });
+
+    const nestedComments = [];
+    comments.forEach((comment) => {
+      if (comment.parentComment) {
+        const parent = commentMap[comment.parentComment];
+        if (parent) {
+          parent.replies.push(commentMap[comment._id]);
+        }
+      } else {
+        nestedComments.push(commentMap[comment._id]);
+      }
+    });
+
+    res.json(nestedComments);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch comment", error: error.message });
+  }
+};
+
+// @desc   Delete a comment and its replies (author or admin only)
+// @route  DELETE /api/comments/:commentId
+// @access Public
+const deleteComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    await Comment.deleteOne({ _id: commentId });
+
+    await Comment.deleteMany({ parentComment: commentId });
+
+    res.json({ message: "Comment and any replies deleted succesfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to delete comment", error: error.message });
+  }
+};
+module.exports = {
+  addComment,
+  getAllComments,
+  getCommentsByRecipe,
+  deleteComment,
 };

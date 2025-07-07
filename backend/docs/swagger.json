@@ -1,137 +1,102 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "AI Destekli Yemek Tarifi API",
+    "title": "Yemek Tarifi API (Kapsamlı)",
     "version": "1.0.0",
-    "description": "MERN stack tabanlı, Google Gemini AI destekli yemek tarifi uygulaması REST API dokümantasyonu."
+    "description": "Tüm controller'ları içeren, tam kapsamlı ve güncel REST API dokümantasyonu."
   },
   "servers": [
     {
       "url": "http://localhost:8080",
-      "description": "Local development server"
+      "description": "Lokal Geliştirme Sunucusu"
     }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Kullanıcı Kayıt ve Giriş İşlemleri"
+    },
+    { "name": "Recipes", "description": "Tarif Yönetimi" },
+    { "name": "Comments", "description": "Yorum Yönetimi" },
+    { "name": "AI", "description": "Yapay Zeka Destekli Tarif İşlemleri" },
+    { "name": "Dashboard", "description": "Yönetim Paneli Verileri" }
   ],
   "paths": {
     "/api/auth/register": {
       "post": {
-        "summary": "Kullanıcı kaydı",
         "tags": ["Authentication"],
+        "summary": "Yeni kullanıcı kaydı oluşturur",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterUser"
-              }
+              "schema": { "$ref": "#/components/schemas/UserRegisterPayload" }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Kullanıcı başarıyla kaydedildi"
-          },
-          "400": {
-            "description": "Email zaten kayıtlı"
-          }
+          "201": { "description": "Kullanıcı oluşturuldu" },
+          "400": { "description": "Kullanıcı zaten mevcut" }
         }
       }
     },
     "/api/auth/login": {
       "post": {
-        "summary": "Kullanıcı girişi",
         "tags": ["Authentication"],
+        "summary": "Kullanıcı girişi yapar",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginUser"
-              }
+              "schema": { "$ref": "#/components/schemas/UserLoginPayload" }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Giriş başarılı, token döner",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "token": {
-                      "type": "string",
-                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Geçersiz kimlik bilgileri"
-          }
+          "200": { "description": "Giriş başarılı" },
+          "500": { "description": "Geçersiz kimlik bilgileri" }
         }
       }
     },
     "/api/auth/profile": {
       "get": {
-        "summary": "Giriş yapan kullanıcının profil bilgilerini getirir",
         "tags": ["Authentication"],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "summary": "Giriş yapmış kullanıcının profilini getirir",
+        "security": [{ "bearerAuth": [] }],
         "responses": {
-          "200": {
-            "description": "Kullanıcı profili",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserProfile"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Yetkisiz"
-          }
+          "200": { "description": "Kullanıcı profili" },
+          "404": { "description": "Kullanıcı bulunamadı" }
         }
       }
     },
-
     "/api/recipes": {
       "get": {
-        "summary": "Tüm tarifleri getir",
         "tags": ["Recipes"],
+        "summary": "Tarifleri durum ve sayfalamaya göre listeler",
         "parameters": [
           {
+            "name": "status",
             "in": "query",
-            "name": "category",
-            "schema": { "type": "string" },
-            "description": "Kategoriye göre filtre"
+            "schema": {
+              "type": "string",
+              "enum": ["all", "published", "draft"]
+            },
+            "description": "Tarif durumu"
           },
           {
+            "name": "page",
             "in": "query",
-            "name": "dietType",
-            "schema": { "type": "string" },
-            "description": "Diyet tipine göre filtre"
-          },
-          {
-            "in": "query",
-            "name": "maxDuration",
             "schema": { "type": "integer" },
-            "description": "Maksimum hazırlanma süresi (dakika)"
+            "description": "Sayfa numarası"
           }
         ],
         "responses": {
           "200": {
-            "description": "Tarif listesi",
+            "description": "Sayfalanmış tarif listesi",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/Recipe" }
+                  "$ref": "#/components/schemas/GetAllRecipesResponse"
                 }
               }
             }
@@ -139,341 +104,280 @@
         }
       },
       "post": {
-        "summary": "Yeni tarif oluştur",
         "tags": ["Recipes"],
+        "summary": "Yeni bir tarif oluşturur",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/RecipeCreate" }
+              "schema": { "$ref": "#/components/schemas/RecipePayload" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Tarif oluşturuldu" } }
+      }
+    },
+    "/api/recipes/search": {
+      "get": {
+        "tags": ["Recipes"],
+        "summary": "Başlık veya içeriğe göre tarif arar",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Arama anahtar kelimesi"
+          }
+        ],
+        "responses": { "200": { "description": "Arama sonuçları" } }
+      }
+    },
+    "/api/recipes/trending": {
+      "get": {
+        "tags": ["Recipes"],
+        "summary": "En popüler (trending) tarifleri getirir",
+        "responses": { "200": { "description": "Popüler tarifler listesi" } }
+      }
+    },
+    "/api/recipes/tag/{tag}": {
+      "get": {
+        "tags": ["Recipes"],
+        "summary": "Belirli bir etikete sahip tarifleri getirir",
+        "parameters": [
+          {
+            "name": "tag",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "200": { "description": "Etikete göre tarifler" } }
+      }
+    },
+    "/api/recipes/{id}": {
+      "put": {
+        "tags": ["Recipes"],
+        "summary": "Bir tarifi günceller",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RecipePayload" }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Tarif oluşturuldu",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Recipe" }
-              }
-            }
-          },
-          "401": {
-            "description": "Yetkisiz"
+          "200": { "description": "Tarif güncellendi" },
+          "403": { "description": "Yetkisiz erişim" },
+          "404": { "description": "Tarif bulunamadı" }
+        }
+      },
+      "delete": {
+        "tags": ["Recipes"],
+        "summary": "Bir tarifi siler",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
           }
+        ],
+        "responses": {
+          "200": { "description": "Tarif silindi" },
+          "404": { "description": "Tarif bulunamadı" }
         }
       }
     },
-
     "/api/recipes/{slug}": {
       "get": {
-        "summary": "Slug’a göre tarif getir",
         "tags": ["Recipes"],
+        "summary": "Slug ile tek bir tarif getirir",
         "parameters": [
           {
             "name": "slug",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" },
-            "description": "Tarif slug’ı"
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
-          "200": {
-            "description": "Tarif",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Recipe" }
-              }
-            }
-          },
-          "404": {
-            "description": "Tarif bulunamadı"
-          }
+          "200": { "description": "Tarif detayı" },
+          "404": { "description": "Tarif bulunamadı" }
         }
       }
     },
-
-    "/api/recipes/{id}": {
+    "/api/recipes/{id}/view": {
       "put": {
-        "summary": "Tarifi güncelle",
         "tags": ["Recipes"],
-        "security": [{ "bearerAuth": [] }],
+        "summary": "Tarifin görüntülenme sayısını bir artırır",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" },
-            "description": "Tarif ID’si"
+            "schema": { "type": "string" }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/RecipeUpdate" }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Tarif güncellendi",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Recipe" }
-              }
-            }
-          },
-          "401": { "description": "Yetkisiz" },
-          "404": { "description": "Tarif bulunamadı" }
-        }
-      },
-      "delete": {
-        "summary": "Tarifi sil",
-        "tags": ["Recipes"],
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Tarif ID’si"
-          }
-        ],
-        "responses": {
-          "200": { "description": "Tarif silindi" },
-          "401": { "description": "Yetkisiz" },
-          "404": { "description": "Tarif bulunamadı" }
-        }
+        "responses": { "200": { "description": "Görüntülenme sayısı arttı" } }
       }
     },
-
-    "/api/comments/{recipeId}": {
+    "/api/recipes/{id}/like": {
+      "put": {
+        "tags": ["Recipes"],
+        "summary": "Tarifin beğeni sayısını bir artırır",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "200": { "description": "Beğeni eklendi" } }
+      }
+    },
+    "/api/comments": {
       "get": {
-        "summary": "Bir tarife ait yorumları getir",
         "tags": ["Comments"],
-        "parameters": [
-          {
-            "name": "recipeId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Tarif ID’si"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Yorum listesi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/Comment" }
-                }
-              }
-            }
-          }
-        }
-      },
+        "summary": "Tüm yorumları iç içe (nested) yapıda getirir",
+        "responses": { "200": { "description": "Tüm yorumlar" } }
+      }
+    },
+    "/api/comments/{recipeId}": {
       "post": {
-        "summary": "Tarife yorum ekle",
         "tags": ["Comments"],
+        "summary": "Bir tarife yeni yorum ekler",
         "security": [{ "bearerAuth": [] }],
         "parameters": [
           {
             "name": "recipeId",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" },
-            "description": "Tarif ID’si"
+            "schema": { "type": "string" }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/CommentCreate" }
+              "schema": { "$ref": "#/components/schemas/CommentPayload" }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Yorum eklendi",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Comment" }
-              }
-            }
-          },
-          "401": {
-            "description": "Yetkisiz"
-          }
+          "201": { "description": "Yorum eklendi" },
+          "404": { "description": "Tarif bulunamadı" }
         }
+      },
+      "get": {
+        "tags": ["Comments"],
+        "summary": "Bir tarife ait tüm yorumları getirir",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "200": { "description": "Tarife ait yorumlar" } }
       }
     },
-
     "/api/comments/{commentId}": {
       "delete": {
-        "summary": "Yorumu sil",
         "tags": ["Comments"],
+        "summary": "Bir yorumu ve altındaki yanıtları siler",
         "security": [{ "bearerAuth": [] }],
         "parameters": [
           {
             "name": "commentId",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" },
-            "description": "Yorum ID’si"
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
           "200": { "description": "Yorum silindi" },
-          "401": { "description": "Yetkisiz" },
           "404": { "description": "Yorum bulunamadı" }
         }
       }
     },
-
-    "/api/likes/{recipeId}": {
+    "/api/ai/create-recipe": {
       "post": {
-        "summary": "Bir tarife beğeni ekle veya kaldır",
-        "tags": ["Likes"],
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [
-          {
-            "name": "recipeId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Tarif ID’si"
-          }
-        ],
-        "responses": {
-          "200": { "description": "Beğeni güncellendi" },
-          "401": { "description": "Yetkisiz" }
-        }
-      },
-      "get": {
-        "summary": "Bir tarifin beğeni sayısını getir",
-        "tags": ["Likes"],
-        "parameters": [
-          {
-            "name": "recipeId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Tarif ID’si"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Beğeni sayısı",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "likesCount": { "type": "integer", "example": 12 }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-
-    "/api/ai/suggest-recipe": {
-      "post": {
-        "summary": "Malzemeye göre tarif önerisi yapar",
         "tags": ["AI"],
+        "summary": "Malzemelere göre akıllı ve detaylı tarif oluşturur",
+        "description": "useOnlyGivenIngredients bayrağı ile AI'ın davranışını kontrol eder. 'true' ise sadece verilen malzemeleri kullanır, 'false' (veya tanımsız) ise yaratıcı önerilerde bulunabilir.",
+        "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SuggestRecipe"
-              }
+              "schema": { "$ref": "#/components/schemas/AICreateRecipePayload" }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Tarif önerisi (Başlık ve malzeme listesi)",
+            "description": "Oluşturulan detaylı tarif",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RecipeSuggestion"
-                }
+                "schema": { "$ref": "#/components/schemas/RecipePayload" }
               }
             }
-          }
+          },
+          "400": { "description": "Eksik veya geçersiz malzeme listesi" },
+          "500": { "description": "AI yanıtı işlenirken bir hata oluştu" }
         }
       }
     },
-
     "/api/ai/auto-fill-steps": {
       "post": {
-        "summary": "Tarif başlığı ve malzemeye göre hazırlanma adımlarını oluşturur",
         "tags": ["AI"],
+        "summary": "Başlık ve malzemelere göre tarif adımları oluşturur",
+        "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FillSteps"
-              }
+              "schema": { "$ref": "#/components/schemas/AIFillStepsPayload" }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Hazırlanma adımları listesi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StepsResponse"
-                }
-              }
-            }
-          }
+          "200": { "description": "Oluşturulan tarif adımları" },
+          "400": { "description": "Eksik başlık veya malzeme" }
         }
       }
     },
-
-    "/api/ai/generate-complete-recipe": {
-      "post": {
-        "summary": "Malzemeye göre tam kapsamlı tarif oluşturur (kategori, diyet tipi, süre, resim dahil)",
-        "tags": ["AI"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GenerateCompleteRecipe"
-              }
-            }
-          }
-        },
+    "/api/dashboard/summary": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "Yönetim paneli için özet verileri getirir",
+        "security": [{ "bearerAuth": [] }],
         "responses": {
           "200": {
-            "description": "Tam kapsamlı tarif bilgileri",
+            "description": "Dashboard özeti",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CompleteRecipeResponse"
+                  "$ref": "#/components/schemas/DashboardSummaryResponse"
                 }
               }
             }
-          },
-          "400": {
-            "description": "Geçersiz malzeme listesi"
-          },
-          "500": {
-            "description": "AI servisi kullanılamıyor"
           }
         }
       }
@@ -488,243 +392,184 @@
       }
     },
     "schemas": {
-      "RegisterUser": {
+      "User": {
         "type": "object",
-        "required": ["username", "email", "password"],
         "properties": {
-          "username": { "type": "string", "example": "onuryilmaz" },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "example": "onur@example.com"
-          },
-          "password": { "type": "string", "example": "12345678" }
+          "_id": { "type": "string" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "profileImageUrl": { "type": "string", "nullable": true },
+          "bio": { "type": "string" },
+          "role": { "type": "string" }
         }
       },
-      "LoginUser": {
+      "UserRegisterPayload": {
         "type": "object",
-        "required": ["email", "password"],
         "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "example": "onur@example.com"
-          },
-          "password": { "type": "string", "example": "12345678" }
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "password": { "type": "string" },
+          "profileImageUrl": { "type": "string" },
+          "bio": { "type": "string" },
+          "adminAccessToken": { "type": "string" }
         }
       },
-      "UserProfile": {
+      "UserLoginPayload": {
         "type": "object",
         "properties": {
-          "_id": { "type": "string", "example": "64a4d2b4e62f3a0012345678" },
-          "username": { "type": "string", "example": "onuryilmaz" },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "example": "onur@example.com"
-          },
-          "avatar": { "type": "string", "nullable": true }
+          "email": { "type": "string" },
+          "password": { "type": "string" }
         }
       },
       "Recipe": {
         "type": "object",
         "properties": {
-          "_id": { "type": "string", "example": "64a4d2b4e62f3a0012345678" },
-          "authorId": { "type": "string" },
-          "title": { "type": "string", "example": "Kabak Mücveri" },
-          "slug": { "type": "string", "example": "kabak-mucveri" },
-          "category": { "type": "string", "example": "Ana Yemek" },
-          "dietType": { "type": "string", "example": "Vejetaryen" },
-          "duration": { "type": "integer", "example": 30 },
-          "imageUrl": { "type": "string", "nullable": true },
+          "_id": { "type": "string" },
+          "title": { "type": "string" },
+          "slug": { "type": "string" },
+          "author": { "$ref": "#/components/schemas/User" },
           "ingredients": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "name": { "type": "string", "example": "Kabak" },
-                "amount": { "type": "string", "example": "3 adet" }
+                "name": { "type": "string" },
+                "amount": { "type": "string" }
               }
             }
           },
-          "steps": {
-            "type": "array",
-            "items": { "type": "string", "example": "Kabakları rendeleyin." }
-          },
-          "likesCount": { "type": "integer", "example": 10 }
+          "dietType": { "type": "string" },
+          "duration": { "type": "integer" },
+          "steps": { "type": "array", "items": { "type": "string" } },
+          "coverImageUrl": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "isDraft": { "type": "boolean" },
+          "views": { "type": "integer" },
+          "likes": { "type": "integer" },
+          "generatedByAI": { "type": "boolean" },
+          "createdAt": { "type": "string" },
+          "updatedAt": { "type": "string" }
         }
       },
-      "RecipeCreate": {
+      "RecipePayload": {
         "type": "object",
-        "required": ["title", "ingredients", "steps"],
         "properties": {
-          "title": { "type": "string", "example": "Kabak Mücveri" },
-          "category": { "type": "string", "example": "Ana Yemek" },
-          "dietType": { "type": "string", "example": "Vejetaryen" },
-          "duration": { "type": "integer", "example": 30 },
-          "imageUrl": { "type": "string", "nullable": true },
+          "title": { "type": "string" },
           "ingredients": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "name": { "type": "string", "example": "Kabak" },
-                "amount": { "type": "string", "example": "3 adet" }
+                "name": { "type": "string" },
+                "amount": { "type": "string" }
               }
             }
           },
-          "steps": {
-            "type": "array",
-            "items": { "type": "string", "example": "Kabakları rendeleyin." }
-          }
-        }
-      },
-      "RecipeUpdate": {
-        "type": "object",
-        "properties": {
-          "title": { "type": "string", "example": "Kabak Mücveri" },
-          "category": { "type": "string", "example": "Ana Yemek" },
-          "dietType": { "type": "string", "example": "Vejetaryen" },
-          "duration": { "type": "integer", "example": 30 },
-          "imageUrl": { "type": "string", "nullable": true },
-          "ingredients": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": { "type": "string", "example": "Kabak" },
-                "amount": { "type": "string", "example": "3 adet" }
-              }
-            }
-          },
-          "steps": {
-            "type": "array",
-            "items": { "type": "string", "example": "Kabakları rendeleyin." }
-          }
+          "dietType": { "type": "string" },
+          "duration": { "type": "integer" },
+          "steps": { "type": "array", "items": { "type": "string" } },
+          "coverImageUrl": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "isDraft": { "type": "boolean" },
+          "generatedByAI": { "type": "boolean" }
         }
       },
       "Comment": {
         "type": "object",
         "properties": {
           "_id": { "type": "string" },
-          "recipeId": { "type": "string" },
-          "userId": { "type": "string" },
-          "text": {
-            "type": "string",
-            "example": "Çok güzel bir tarif, teşekkürler!"
-          },
-          "username": { "type": "string", "example": "onuryilmaz" },
-          "createdAt": { "type": "string", "format": "date-time" }
-        }
-      },
-      "CommentCreate": {
-        "type": "object",
-        "required": ["text"],
-        "properties": {
-          "text": {
-            "type": "string",
-            "example": "Çok güzel bir tarif, teşekkürler!"
+          "recipe": { "type": "string" },
+          "author": { "$ref": "#/components/schemas/User" },
+          "content": { "type": "string" },
+          "parentComment": { "type": "string", "nullable": true },
+          "createdAt": { "type": "string" },
+          "replies": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Comment" }
           }
         }
       },
-      "SuggestRecipe": {
+      "CommentPayload": {
         "type": "object",
-        "required": ["ingredients"],
+        "properties": {
+          "content": { "type": "string" },
+          "parentComment": { "type": "string" }
+        }
+      },
+      "AICreateRecipePayload": {
+        "type": "object",
         "properties": {
           "ingredients": {
             "type": "array",
             "items": { "type": "string" },
-            "example": ["domates", "peynir", "maydanoz"]
+            "description": "Tarif oluşturmak için kullanılacak malzeme listesi."
           },
-          "dietType": { "type": "string", "example": "Vejetaryen" },
-          "maxDuration": { "type": "integer", "example": 45 }
-        }
-      },
-      "RecipeSuggestion": {
-        "type": "object",
-        "properties": {
-          "title": { "type": "string", "example": "Fırında Sebzeli Makarna" },
-          "ingredients": {
-            "type": "array",
-            "items": { "type": "string" }
+          "useOnlyGivenIngredients": {
+            "type": "boolean",
+            "description": "AI'ın sadece verilen malzemeleri kullanıp kullanmayacağını belirler. Gönderilmezse 'false' kabul edilir.",
+            "default": false
           }
         }
       },
-      "FillSteps": {
+      "AIFillStepsPayload": {
         "type": "object",
-        "required": ["title", "ingredients"],
         "properties": {
-          "title": { "type": "string", "example": "Fırında Sebzeli Makarna" },
-          "ingredients": {
-            "type": "array",
-            "items": { "type": "string" }
-          }
+          "title": { "type": "string" },
+          "ingredients": { "type": "array", "items": { "type": "string" } }
         }
       },
-      "StepsResponse": {
+      "GetAllRecipesResponse": {
         "type": "object",
         "properties": {
-          "steps": {
+          "recipes": {
             "type": "array",
-            "items": {
-              "type": "string",
-              "example": "Fırını 180 dereceye ısıtın."
+            "items": { "$ref": "#/components/schemas/Recipe" }
+          },
+          "page": { "type": "integer" },
+          "totalPages": { "type": "integer" },
+          "totalCount": { "type": "integer" },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "all": { "type": "integer" },
+              "published": { "type": "integer" },
+              "draft": { "type": "integer" }
             }
           }
         }
       },
-      "GenerateCompleteRecipe": {
+      "DashboardSummaryResponse": {
         "type": "object",
-        "required": ["ingredients"],
         "properties": {
-          "ingredients": {
+          "stats": {
+            "type": "object",
+            "properties": {
+              "totalRecipes": { "type": "integer" },
+              "drafts": { "type": "integer" },
+              "published": { "type": "integer" },
+              "totalViews": { "type": "integer" },
+              "totalLikes": { "type": "integer" },
+              "totalComments": { "type": "integer" },
+              "aiGenerated": { "type": "integer" }
+            }
+          },
+          "topRecipes": {
             "type": "array",
-            "items": { "type": "string" },
-            "example": ["chicken", "tomato", "onion", "garlic"]
-          }
-        }
-      },
-      "CompleteRecipeResponse": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "example": "Simple Tomato Chicken"
+            "items": { "$ref": "#/components/schemas/Recipe" }
           },
-          "category": {
-            "type": "string",
-            "enum": ["breakfast", "lunch", "dinner", "dessert", "snack", "appetizer"],
-            "example": "dinner"
+          "recentComments": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Comment" }
           },
-          "dietType": {
-            "type": "string",
-            "enum": ["vegetarian", "vegan", "gluten-free", "keto", "low-carb", "regular"],
-            "example": "regular"
-          },
-          "duration": {
-            "type": "integer",
-            "example": 40
-          },
-          "ingredients": {
+          "tagUsage": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "name": { "type": "string", "example": "Chicken breast" },
-                "amount": { "type": "string", "example": "2 (6 oz each)" }
+                "tag": { "type": "string" },
+                "count": { "type": "integer" }
               }
             }
-          },
-          "steps": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "example": "Preheat oven to 375°F (190°C)."
-            }
-          },
-          "imageUrl": {
-            "type": "string",
-            "example": "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop&crop=food"
           }
         }
       }

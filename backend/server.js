@@ -1,54 +1,47 @@
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
-import mongoose from "mongoose";
-import fs from "fs";
-import swaggerUi from "swagger-ui-express";
+require("dotenv").config();
+const fs = require("fs");
+const swaggerUi = require("swagger-ui-express");
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const connectDB = require("./config/db");
 
-import connectDB from "./config/db.js";
-import authRoutes from "./routes/auth.js";
-import recipeRoutes from "./routes/recipes.js";
-import commentRoutes from "./routes/comments.js";
-import likeRoutes from "./routes/likes.js";
-import aiRoutes from "./routes/ai.js";
-
-dotenv.config();
-connectDB();
+const authRoutes = require("./routes/authRoutes");
+const recipeRoutes = require("./routes/recipesRoutes");
+const commentsRoutes = require("./routes/commentRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
 
-// Middlewares
-app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
+//Middleware to handle CORS
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
-// Fallback: always attach CORS headers (useful for errors)
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  if (req.method === "OPTIONS") return res.sendStatus(200);
-  next();
-});
+// Connect DB
+connectDB();
+
+// Middleware
+app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/recipes", recipeRoutes);
-app.use("/api/comments", commentRoutes);
-app.use("/api/likes", likeRoutes);
+app.use("/api/comments", commentsRoutes);
+app.use("/api/dashboard-summary", dashboardRoutes);
 app.use("/api/ai", aiRoutes);
+
+// Server Uploads folder
+app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));
 
 // Swagger docs
 const swaggerDocument = JSON.parse(fs.readFileSync("./docs/swagger.json"));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
-// Simple health check
-app.get("/", (req, res) => {
-  res.send("API is running...");
-});
 
 // Server listen
 const PORT = process.env.PORT || 5000;
