@@ -329,18 +329,6 @@
               "schema": { "$ref": "#/components/schemas/AICreateRecipePayload" }
             }
           }
-        },
-        "responses": {
-          "200": {
-            "description": "Oluşturulan detaylı tarif",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/RecipePayload" }
-              }
-            }
-          },
-          "400": { "description": "Eksik veya geçersiz malzeme listesi" },
-          "500": { "description": "AI yanıtı işlenirken bir hata oluştu" }
         }
       }
     },
