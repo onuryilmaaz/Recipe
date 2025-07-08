@@ -41,7 +41,7 @@ const ShareRecipe = ({ title }) => {
 
         <button
           onClick={handleCopyClick}
-          className="bg-white hover:bg-sky-50 text-sky-800 font-medium px-2 py-2 rounded-full"
+          className="bg-white hover:bg-orange-50 text-orange-800 font-medium px-2 py-2 rounded-full"
         >
           {isCopied ? (
             <LuCheck className="text-[20px]" />

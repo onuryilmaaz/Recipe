@@ -26,12 +26,12 @@ const TagInput = ({ tags, setTags }) => {
       {tags.map((tag, index) => (
         <div
           key={index}
-          className="flex items-center bg-sky-100/70 text-sky-700 px-3 py-1 rounded text-sm font-medium"
+          className="flex items-center bg-orange-100/70 text-orange-700 px-3 py-1 rounded text-sm font-medium"
         >
           {tag}
           <button
             type="button"
-            className="ml-2 text-sky-500 hover:text-sky-700 font-bold cursor-pointer"
+            className="ml-2 text-orange-500 hover:text-orange-700 font-bold cursor-pointer"
             onClick={() => handleRemove(index)}
           >
             &times;

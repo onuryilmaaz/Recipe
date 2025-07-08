@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import RecipeLayout from "../../components/layouts/RecipeLayout/RecipeLayout";
-import { LuGalleryVerticalEnd, LuLoaderCircle } from "react-icons/lu";
+import { LuGalleryVerticalEnd } from "react-icons/lu";
+import ModernLoader from "../../components/Loader/ModernLoader";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
@@ -20,17 +21,17 @@ const RecipeLandingPage = () => {
   const getAllPosts = async (pageNumber = 1) => {
     try {
       setIsLoading(true);
-      const response = await axiosInstance.get(API_PATHS.POSTS.GET_ALL, {
+      const response = await axiosInstance.get(API_PATHS.RECIPE.GET_ALL, {
         params: {
-          status: "published",
+          isDraft: false,
           page: pageNumber,
         },
       });
 
-      const { posts, totalPages } = response.data;
+      const { recipes, totalPages } = response.data;
 
       setBlogPostList((prevPosts) =>
-        pageNumber === 1 ? posts : [...prevPosts, ...posts]
+        pageNumber === 1 ? recipes : [...prevPosts, ...recipes]
       );
 
       setTotalPages(totalPages);
@@ -64,8 +65,15 @@ const RecipeLandingPage = () => {
             <FeaturedRecipe
               title={blogPostList[0].title}
               coverImageUrl={blogPostList[0].coverImageUrl}
-              description={blogPostList[0].content}
+              description={
+                blogPostList[0].steps && blogPostList[0].steps.length > 0
+                  ? blogPostList[0].steps.slice(0, 2).join(" ")
+                  : "Harika bir tarif sizleri bekliyor..."
+              }
               tags={blogPostList[0].tags}
+              duration={blogPostList[0].duration}
+              dietType={blogPostList[0].dietType}
+              views={blogPostList[0].views}
               updatedOn={
                 blogPostList[0].updatedAt
                   ? moment(blogPostList[0].updatedAt).format("Do MMM YYYY")
@@ -85,8 +93,16 @@ const RecipeLandingPage = () => {
                     key={item._id}
                     title={item.title}
                     coverImageUrl={item.coverImageUrl}
-                    description={item.description}
+                    description={
+                      item.steps && item.steps.length > 0
+                        ? item.steps.slice(0, 1).join(" ")
+                        : "Harika bir tarif sizleri bekliyor..."
+                    }
                     tags={item.tags}
+                    duration={item.duration}
+                    dietType={item.dietType}
+                    views={item.views}
+                    likes={item.likes}
                     updatedOn={
                       item.updatedAt
                         ? moment(item.updatedAt).format("Do MMM YYYY")
@@ -101,16 +117,16 @@ const RecipeLandingPage = () => {
           {page < totalPages && (
             <div className="flex items-center justify-center mt-5">
               <button
-                className="flex items-center gap-3 text-sm text-white font-medium bg-black px-7 py-2.5 mt-6 rounded-full text-nowrap hover:scale-105 transition-all cursor-pointer"
+                className="flex items-center gap-3 text-sm text-white font-medium bg-orange-500 px-7 py-2.5 mt-6 rounded-full text-nowrap hover:scale-105 hover:bg-orange-600 transition-all cursor-pointer"
                 disabled={isLoading}
                 onClick={handleLoadMore}
               >
                 {isLoading ? (
-                  <LuLoaderCircle className="animate-spin text-[15px]" />
+                  <ModernLoader size="small" type="spinner" color="white" />
                 ) : (
                   <LuGalleryVerticalEnd className="text-lg" />
                 )}{" "}
-                {isLoading ? "Loading..." : "Load More"}
+                {isLoading ? "Yükleniyor..." : "Daha Fazla Yükle"}
               </button>
             </div>
           )}

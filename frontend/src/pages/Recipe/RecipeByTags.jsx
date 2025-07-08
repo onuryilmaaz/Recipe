@@ -18,7 +18,7 @@ const RecipeByTags = () => {
 
     try {
       const response = await axiosInstance.get(
-        API_PATHS.POSTS.GET_BY_TAG(tagName)
+        API_PATHS.RECIPE.GET_BY_TAG(tagName)
       );
 
       setBlogPostList(response.data?.length > 0 ? response.data : []);
@@ -41,13 +41,14 @@ const RecipeByTags = () => {
       <div>
         <div className="grid grid-cols-12 gap-5">
           <div className="col-span-12 md:col-span-9">
-            <div className="flex items-center justify-center bg-linear-to-r from-sky-500 via-teal-50 to-cyan-100 h-32 p-6 rounded-lg">
+            <div className="flex items-center justify-center bg-gradient-to-r from-orange-500 via-orange-50 to-amber-100 h-32 p-6 rounded-lg">
               <div className="text-center">
-                <h3 className="text-xl font-semibold text-sky-900">
+                <h3 className="text-xl font-semibold text-orange-900">
                   # {tagName}
                 </h3>
                 <p className="text-sm font-medium text-gray-700 mt-1">
-                  Showing {blogPostList.length} posts tagged with #{tagName}.
+                  #{tagName} etiketiyle {blogPostList.length} tarif
+                  gösteriliyor.
                 </p>
               </div>
             </div>
@@ -58,15 +59,23 @@ const RecipeByTags = () => {
                     key={item._id}
                     title={item.title}
                     coverImageUrl={item.coverImageUrl}
-                    description={item.description}
+                    description={
+                      item.steps && item.steps.length > 0
+                        ? item.steps.slice(0, 1).join(" ")
+                        : "Delicious recipe awaits..."
+                    }
                     tags={item.tags}
+                    duration={item.duration}
+                    dietType={item.dietType}
+                    views={item.views}
+                    likes={item.likes}
                     updatedOn={
                       item.updatedAt
                         ? moment(item.updatedAt).format("Do MMM YYYY")
                         : "-"
                     }
-                    authorName={item.author.name}
-                    authProfileImg={item.author.profileImageUrl}
+                    authorName={item.author?.name || "Admin"}
+                    authProfileImg={item.author?.profileImageUrl || ""}
                     onClick={() => handleClick(item)}
                   />
                 ))

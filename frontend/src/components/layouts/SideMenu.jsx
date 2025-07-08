@@ -14,8 +14,6 @@ const SideMenu = ({ activeMenu, isBlogMenu, setOpenSideMenu }) => {
       return;
     }
 
-    
-
     setOpenSideMenu((prevState) => !prevState);
     navigate(route);
   };
@@ -59,7 +57,7 @@ const SideMenu = ({ activeMenu, isBlogMenu, setOpenSideMenu }) => {
           key={`menu_${index}`}
           className={`w-full flex items-center gap-4 text-[15px] ${
             activeMenu == item.label
-              ? "text-white bg-linear-to-r from-sky-500 to-cyan-400"
+              ? "text-white bg-gradient-to-r from-orange-500 to-amber-500"
               : ""
           } py-3 px-6 rounded-lg mb-3 cursor-pointer`}
           onClick={() => handleClick(item.path)}
@@ -74,7 +72,7 @@ const SideMenu = ({ activeMenu, isBlogMenu, setOpenSideMenu }) => {
           onClick={() => handleLogout()}
         >
           <LuLogOut className="text-xl" />
-          LogOut
+          Çıkış
         </button>
       )}
     </div>

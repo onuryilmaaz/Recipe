@@ -19,21 +19,25 @@ const getDashboardSummary = async (req, res) => {
       { $group: { _id: null, total: { $sum: "$views" } } },
     ]);
     const totalLikesAgg = await Recipe.aggregate([
-      { $group: { _id: null, total: { $sum: "$likes" } } },
+      { $group: { _id: null, total: { $sum: { $size: "$likes" } } } },
     ]);
     const totalViews = totalViewsAgg[0]?.total || 0;
     const totalLikes = totalLikesAgg[0]?.total || 0;
 
     const topRecipes = await Recipe.find({ isDraft: false })
       .select("title coverImageUrl views likes")
-      .sort({ views: -1, likes: -1 })
+      .sort({ views: -1 })
       .limit(5);
 
     const recentComments = await Comment.find()
       .sort({ createdAt: -1 })
       .limit(5)
       .populate("author", "name profileImageUrl")
-      .populate("recipe", "title coverImageUrl");
+      .populate({
+        path: "recipe",
+        select: "title coverImageUrl",
+        options: { virtuals: true }
+      });
 
     const tagUsage = await Recipe.aggregate([
       { $unwind: "$tags" },

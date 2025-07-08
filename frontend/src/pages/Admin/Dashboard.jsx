@@ -29,10 +29,11 @@ const Dashboard = () => {
         API_PATHS.DASHBOARD.GET_DASHBOARD_DATA
       );
       if (response.data) {
+        console.log("📊 Dashboard Data:", response.data);
         setDashboardData(response.data);
 
-        const topPosts = response.data?.topPosts || [];
-        const totalViews = Math.max(...topPosts.map((p) => p.views), 1);
+        const topRecipes = response.data?.topRecipes || [];
+        const totalViews = Math.max(...topRecipes.map((p) => p.views || 0), 1);
         setMaxViews(totalViews);
       }
     } catch (error) {
@@ -63,34 +64,34 @@ const Dashboard = () => {
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mt-5">
               <DashboardSummaryCard
                 icon={<LuGalleryVerticalEnd />}
-                label="Total Post"
-                value={dashboardData?.stats?.totalPosts || 0}
-                bgColor="bg-sky-100/60"
-                color="text-sky-500"
+                                  label="Toplam Tarif"
+                value={dashboardData?.stats?.totalRecipes || 0}
+                bgColor="bg-orange-100/60"
+                color="text-orange-500"
               />
 
               <DashboardSummaryCard
                 icon={<LuCheckCheck />}
                 label="Published"
                 value={dashboardData?.stats?.published || 0}
-                bgColor="bg-sky-100/60"
-                color="text-sky-500"
+                bgColor="bg-amber-100/60"
+                color="text-amber-500"
               />
 
               <DashboardSummaryCard
                 icon={<LuChartLine />}
-                label="Total Views"
+                                  label="Toplam Görüntüleme"
                 value={dashboardData?.stats?.totalViews || 0}
-                bgColor="bg-sky-100/60"
-                color="text-sky-500"
+                bgColor="bg-yellow-100/60"
+                color="text-yellow-600"
               />
 
               <DashboardSummaryCard
                 icon={<LuHeart />}
-                label="Total Likes"
+                                  label="Toplam Beğeni"
                 value={dashboardData?.stats?.totalLikes || 0}
-                bgColor="bg-sky-100/60"
-                color="text-sky-500"
+                bgColor="bg-red-100/60"
+                color="text-red-500"
               />
             </div>
           </div>
@@ -105,24 +106,36 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <h5 className="font-medium">Top Posts</h5>
               </div>
-              {dashboardData?.topPosts?.slice(0, 3)?.map((post) => (
-                <TopRecipeCard
-                  key={post.id}
-                  title={post.title}
-                  coverImageUrl={post.coverImageUrl}
-                  views={post.views}
-                  likes={post.likes}
-                  maxViews={maxViews}
-                />
-              ))}
+              {dashboardData?.topRecipes?.length > 0 ? (
+                dashboardData.topRecipes
+                  .slice(0, 3)
+                  .map((recipe) => (
+                    <TopRecipeCard
+                      key={recipe._id}
+                      title={recipe.title}
+                      coverImageUrl={recipe.coverImageUrl}
+                      views={recipe.views || 0}
+                      likes={recipe.likes?.length || 0}
+                      maxViews={maxViews}
+                    />
+                  ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 text-sm">No recipes yet</p>
+                </div>
+              )}
             </div>
             <div className="col-span-12 bg-white p-6 rounded-2xl shadow-md shadow-gray-100 border border-gray-200/50">
               <div className="flex items-center justify-between">
-                <h5 className="font-medium">Recent Comments</h5>
+                <h5 className="font-medium">Son Yorumlar</h5>
               </div>
-              <RecentCommentsList
-                comments={dashboardData.recentComments || []}
-              />
+              {dashboardData?.recentComments?.length > 0 ? (
+                <RecentCommentsList comments={dashboardData.recentComments} />
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 text-sm">No comments yet</p>
+                </div>
+              )}
             </div>
           </div>
         </>

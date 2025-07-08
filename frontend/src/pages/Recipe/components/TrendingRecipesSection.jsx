@@ -10,7 +10,7 @@ const TrendingRecipesSection = () => {
   const getTrendingPosts = async () => {
     try {
       const response = await axiosInstance.get(
-        API_PATHS.POSTS.GET_TRENDING_POST
+        API_PATHS.RECIPE.GET_TRENDING_RECIPE
       );
 
       setPostList(response.data?.length > 0 ? response.data : []);
@@ -50,8 +50,8 @@ export default TrendingRecipesSection;
 const RecipeCard = ({ title, coverImageUrl, tags, onClick }) => {
   return (
     <div className="cursor-pointer mb-3" onClick={onClick}>
-      <h6 className="text-[10px] font-semibold text-sky-500">
-        {tags[0]?.toUpperCase() || "BLOG"}
+      <h6 className="text-[10px] font-semibold text-orange-500">
+        {tags[0]?.toUpperCase() || "RECIPE"}
       </h6>
       <div className="flex items-start gap-4 mt-2">
         <img

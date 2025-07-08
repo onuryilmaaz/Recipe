@@ -1,5 +1,6 @@
 import moment from "moment";
 import { LuDot } from "react-icons/lu";
+import CharAvatar from "./CharAvatar";
 
 const RecentCommentsList = ({ comments }) => {
   return (
@@ -10,11 +11,20 @@ const RecentCommentsList = ({ comments }) => {
             key={comment._id}
             className="flex gap-4 border-b border-gray-100 pb-4 last:border-none"
           >
-            <img
-              src={comment.author?.profileImageUrl}
-              alt={comment.author?.name}
-              className="w-10 h-10 rounded-full object-cover"
-            />
+            {comment.author?.profileImageUrl ? (
+              <img
+                src={comment.author.profileImageUrl}
+                alt={comment.author.name}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            ) : (
+              <CharAvatar
+                fullName={comment.author?.name || "User"}
+                widht="w-10"
+                height="h-10"
+                style="text-sm"
+              />
+            )}
             <div className="flex-1">
               <div className="flex justify-between items-start">
                 <div>
@@ -31,13 +41,19 @@ const RecentCommentsList = ({ comments }) => {
                 </div>
               </div>
               <div className="mt-2 flex items-center gap-3">
-                <img
-                  src={comment.post?.coverImageUrl}
-                  alt={comment.post?.title}
-                  className="w-9 h-9 rounded-md object-cover "
-                />
+                {comment.recipe?.coverImageUrl ? (
+                  <img
+                    src={comment.recipe.coverImageUrl}
+                    alt={comment.recipe.title}
+                    className="w-9 h-9 rounded-md object-cover"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-md bg-gray-200 flex items-center justify-center">
+                    <span className="text-xs text-gray-500">📖</span>
+                  </div>
+                )}
                 <p className="text-[13px] text-gray-700 line-clamp-2">
-                  {comment.post?.title}
+                  {comment.recipe?.title || "Recipe"}
                 </p>
               </div>
             </div>

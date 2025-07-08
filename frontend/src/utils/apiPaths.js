@@ -16,6 +16,8 @@ export const API_PATHS = {
     GENERATE_BLOG_POST: "/api/ai/generate",
     GENERATE_FROM_INGREDIENTS: "/api/ai/generate-from-ingredients",
     GENERATE_FROM_TITLE: "/api/ai/generate-from-title",
+    GENERATE_POST_SUMMARY: "/api/ai/generate-post-summary",
+    GENERATE_COMMENT_REPLY: "/api/ai/generate-comment-reply",
   },
   RECIPE: {
     CREATE: "/api/recipes",

@@ -15,7 +15,7 @@ const RecipeIdeaCard = ({ title, description, tags, tone, onSelect }) => {
         {tags.map((tag, index) => (
           <div
             key={`tag_${index}`}
-            className="text-xs text-sky-700 font-medium bg-sky-50 px-2.5 py-1 rounded"
+            className="text-xs text-orange-700 font-medium bg-orange-50 px-2.5 py-1 rounded"
           >
             {tag}
           </div>

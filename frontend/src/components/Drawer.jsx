@@ -11,7 +11,7 @@ const Drawer = ({ isOpen, onClose, title, children }) => {
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex flex-col items-start gap-3">
-          <span className="flex items-center gap-2 bg-cyan-100/60 text-xs text-sky-500 font-medium px-3 py-0.5 rounded-full text-nowrap">
+          <span className="flex items-center gap-2 bg-orange-100/60 text-xs text-orange-500 font-medium px-3 py-0.5 rounded-full text-nowrap">
             <LuSparkles /> Summarize this post
           </span>
           <h5

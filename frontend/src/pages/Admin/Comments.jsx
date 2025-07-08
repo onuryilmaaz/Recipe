@@ -29,7 +29,7 @@ const Comments = () => {
   const deleteComment = async (commentId) => {
     try {
       await axiosInstance.delete(API_PATHS.COMMENTS.DELETE(commentId));
-      toast.success("Comment Deleted Successfully");
+      toast.success("Yorum Başarıyla Silindi");
       setOpenDeleteAlert({
         open: false,
         data: null,
@@ -48,7 +48,7 @@ const Comments = () => {
   return (
     <DashboardLayout activeMenu="Comments">
       <div className="w-auto sm:max-w-[900px] mx-auto">
-        <h2 className="text-2xl font-semibold mt-2 mb-5">Comments</h2>
+        <h2 className="text-2xl font-semibold mt-2 mb-5">Yorumlar</h2>
         {comments.map((comment) => (
           <CommentInfoCard
             key={comment._id}
@@ -82,7 +82,7 @@ const Comments = () => {
       >
         <div className="w-[30vw]">
           <DeleteAlertContent
-            content="Are you sure you want to delete this comment?"
+            content="Bu yorumu silmek istediğinizden emin misiniz?"
             onDelete={() => deleteComment(openDeleteAlert.data)}
           />
         </div>

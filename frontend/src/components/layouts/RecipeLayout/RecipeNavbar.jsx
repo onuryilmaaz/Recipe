@@ -11,6 +11,7 @@ import ProfileInfoCard from "../../Cards/ProfileInfoCard";
 import Login from "../../Auth/Login";
 import SignUp from "../../Auth/SignUp";
 import Modal from "../../Modal";
+import SearchBarPopUp from "../../../pages/Recipe/components/SearchBarPopUp";
 
 const RecipeNavbar = ({ activeMenu }) => {
   const { user, setOpenAuthForm } = useContext(UserContext);
@@ -46,7 +47,7 @@ const RecipeNavbar = ({ activeMenu }) => {
                   <li className="text-[15px] text-black font-medium list-none relative group cursor-pointer">
                     {item.label}
                     <span
-                      className={`absolute inset-x-0 bottom-0 h-[2px] bg-sky-500 transition-all duration-300 origin-left ${
+                      className={`absolute inset-x-0 bottom-0 h-[2px] bg-orange-500 transition-all duration-300 origin-left ${
                         index == 0 ? "scale-x-100" : "scale-x-0"
                       } group-hover:scale-x-100`}
                     ></span>
@@ -57,14 +58,14 @@ const RecipeNavbar = ({ activeMenu }) => {
           </nav>
           <div className="flex items-center gap-6">
             <button
-              className="hover:text-sky-500 cursor-pointer"
+              className="hover:text-orange-500 cursor-pointer"
               onClick={() => setOpenSearchBar(true)}
             >
               <LuSearch className="text-[22px]" />
             </button>
             {!user ? (
               <button
-                className="flex items-center justify-center gap-3 bg-linear-to-r from-sky-500 to-cyan-400 text-xs md:text-sm font-semibold text-white px-5 md:px-7 py-2 rounded-full hover:bg-black hover:text-white transition-colors cursor-pointer hover:shadow-2xl hover:shadow-cyan-200"
+                className="flex items-center justify-center gap-3 bg-gradient-to-r from-orange-500 to-orange-400 text-xs md:text-sm font-semibold text-white px-5 md:px-7 py-2 rounded-full hover:bg-orange-600 hover:text-white transition-colors cursor-pointer hover:shadow-2xl hover:shadow-orange-200"
                 onClick={() => setOpenAuthForm(true)}
               >
                 Login/SignUp
@@ -88,6 +89,7 @@ const RecipeNavbar = ({ activeMenu }) => {
       </div>
 
       <AuthModel />
+      <SearchBarPopUp isOpen={openSearchBar} setIsOpen={setOpenSearchBar} />
     </>
   );
 };

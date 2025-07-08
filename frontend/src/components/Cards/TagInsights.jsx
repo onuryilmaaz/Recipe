@@ -1,13 +1,13 @@
 import CustomPieChart from "../Charts/CustomPieChart";
 
 const COLORS = [
-  "#0096cc",
-  "#00a9e6",
-  "#00bcff",
-  "#1ac3ff",
-  "#33c9ff",
-  "#4dd0ff",
-  "#66d7ff",
+  "#f97316", // orange-500
+  "#fb923c", // orange-400
+  "#fdba74", // orange-300
+  "#fed7aa", // orange-200
+  "#f59e0b", // amber-500
+  "#fbbf24", // amber-400
+  "#fcd34d", // amber-300
 ];
 
 const TagCould = ({ tags }) => {
@@ -19,7 +19,7 @@ const TagCould = ({ tags }) => {
         return (
           <span
             key={tag.name}
-            className="font-medium text-sky-900/80 bg-sky-100 px-3 py-0.5 rounded-lg"
+            className="font-medium text-orange-900/80 bg-orange-100 px-3 py-0.5 rounded-lg"
             style={{ fontSize: `${fontSize}px` }}
           >
             #{tag.name}

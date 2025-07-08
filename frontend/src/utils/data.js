@@ -9,19 +9,19 @@ import {
 export const SIDE_MENU_DATA = [
   {
     id: "01",
-    label: "Dashboard",
+    label: "Panel",
     icon: LuLayoutDashboard,
     path: "/admin/dashboard",
   },
   {
     id: "02",
-    label: "Recipes",
+    label: "Tarifler",
     icon: LuGalleryVerticalEnd,
     path: "/admin/recipes",
   },
   {
     id: "03",
-    label: "Comments",
+    label: "Yorumlar",
     icon: LuMessageSquareQuote,
     path: "/admin/comments",
   },
@@ -30,20 +30,8 @@ export const SIDE_MENU_DATA = [
 export const BLOG_NAVBAR_DATA = [
   {
     id: "01",
-    label: "Home",
+    label: "Ana Sayfa",
     icon: LuLayoutTemplate,
     path: "/",
-  },
-  {
-    id: "02",
-    label: "Tavuk",
-    icon: LuTag,
-    path: "/tag/Vegan",
-  },
-  {
-    id: "03",
-    label: "Sebze",
-    icon: LuTag,
-    path: "/tag/Sebze",
   },
 ];

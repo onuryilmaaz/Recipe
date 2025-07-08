@@ -12,7 +12,7 @@ import RecipesEditor from "./pages/Admin/RecipesEditor";
 import Comments from "./pages/Admin/Comments";
 
 import PrivateRoute from "./routes/PrivateRoute";
-import UserProvider from "./context/userContext";
+import { UserProvider } from "./context/userContext";
 
 const App = () => {
   return (
@@ -23,20 +23,20 @@ const App = () => {
             {/* Default Route */}
             <Route path="/" element={<RecipeLandingPage />} />
             <Route path="/:slug" element={<RecipesView />} />
-            <Route path="/tag/:tageName" element={<RecipeByTags />} />
+            <Route path="/tag/:tagName" element={<RecipeByTags />} />
             <Route path="/search" element={<SearchRecipes />} />
 
             {/* Admin Routes */}
-            <Route element={<PrivateRoute allowedRoles={["Admin"]} />} />
-            <Route path="/admin/dashboard" element={<Dashboard />} />
-            <Route path="/admin/posts" element={<Recipes />} />
-            <Route path="/admin/create" element={<RecipesEditor />} />
-            <Route
-              path="/admin/edit/:postSlug"
-              element={<RecipesEditor isEdit={true} />}
-            />
-            <Route path="/admin/comments" element={<Comments />} />
-            <Route />
+            <Route element={<PrivateRoute allowedRoles={["Admin"]} />}>
+              <Route path="/admin/dashboard" element={<Dashboard />} />
+              <Route path="/admin/recipes" element={<Recipes />} />
+              <Route path="/admin/create" element={<RecipesEditor />} />
+              <Route
+                path="/admin/edit/:recipeSlug"
+                element={<RecipesEditor isEdit={true} />}
+              />
+              <Route path="/admin/comments" element={<Comments />} />
+            </Route>
 
             <Route path="/admin-login" element={<AdminLogin />} />
           </Routes>

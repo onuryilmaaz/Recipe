@@ -15,9 +15,9 @@ const TopRecipeCard = ({ title, coverImageUrl, views, likes, maxViews }) => {
           {title}{" "}
         </h3>
       </div>
-      <div className="relative w-full h-1.5 bg-sky-100/60 rounded-full overflow-hidden mt-1">
+      <div className="relative w-full h-1.5 bg-orange-100/60 rounded-full overflow-hidden mt-1">
         <div
-          className="h-full bg-gradient-to-r from-sky-50 to-cyan-400 rounded-full transition-all duration-300"
+          className="h-full bg-gradient-to-r from-orange-200 to-orange-500 rounded-full transition-all duration-300"
           style={{ width: `${viewPercentage}%` }}
         ></div>
       </div>
@@ -27,7 +27,7 @@ const TopRecipeCard = ({ title, coverImageUrl, views, likes, maxViews }) => {
         </span>
         <span className="flex items-center gap-1 text-sm text-black">
           {" "}
-          <LuHeart className="text-[16px] text-gray-500" />
+          <LuHeart className="text-[16px] text-red-500" />
           {likes} likes
         </span>
       </div>

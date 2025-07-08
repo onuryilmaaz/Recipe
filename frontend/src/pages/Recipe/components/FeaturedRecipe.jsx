@@ -6,6 +6,9 @@ const FeaturedRecipe = ({
   updatedOn,
   authorName,
   authProfileImg,
+  duration,
+  dietType,
+  views,
   onClick,
 }) => {
   return (
@@ -25,14 +28,34 @@ const FeaturedRecipe = ({
           <h2 className="text-lg md:text-2xl font-bold mb-2 line-clamp-3">
             {title}
           </h2>
-          <p className="text-gray-700 text-[13px] mb-4 line-clamp-3">
+          <p className="text-gray-700 text-[13px] mb-3 line-clamp-3">
             {description}
           </p>
+          <div className="flex items-center gap-4 mb-3 text-xs text-gray-600">
+            {duration && (
+              <span className="flex items-center gap-1">
+                <span>⏱️</span>
+                {duration} dk
+              </span>
+            )}
+            {dietType && (
+              <span className="flex items-center gap-1">
+                <span>🥗</span>
+                {dietType}
+              </span>
+            )}
+            {views > 0 && (
+              <span className="flex items-center gap-1">
+                <span>👁️</span>
+                {views} görüntülenme
+              </span>
+            )}
+          </div>
           <div className="flex items-center flex-wrap gap-2 mb-4">
             {tags.slice(0, 3).map((tag, index) => (
               <span
                 key={index}
-                className="bg-sky-200/50 text-sky-800/80 text-xs font-medium px-3 py-0 rounded-full text-nowrap"
+                className="bg-orange-200/50 text-orange-800/80 text-xs font-medium px-3 py-0 rounded-full text-nowrap"
               >
                 # {tag}
               </span>

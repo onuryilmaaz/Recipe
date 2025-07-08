@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect, useState } from "react";
-import { LuCircleAlert, LuDot, LuSparkles } from "react-icons/lu";
+import { LuDot } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosInstance";
@@ -8,14 +8,10 @@ import { API_PATHS } from "../../utils/apiPaths";
 import RecipeLayout from "../../components/layouts/RecipeLayout/RecipeLayout";
 import moment from "moment";
 import TrendingRecipesSection from "./components/TrendingRecipesSection";
-import MarkDownContent from "./components/MarkDownContent";
 import ShareRecipe from "./components/ShareRecipe";
-import { sanitizeMarkdown } from "../../utils/helper";
 import CommentReplyInput from "../../components/Inputs/CommentReplyInput";
 import CommentInfoCard from "./components/CommentInfoCard";
 import toast from "react-hot-toast";
-import SkeletonLoader from "../../components/Loader/SkeletonLoader";
-import Drawer from "../../components/Drawer";
 import LikeCommentButton from "./components/LikeCommentButton";
 
 const RecipeView = () => {
@@ -30,16 +26,10 @@ const RecipeView = () => {
   const [replyText, setReplyText] = useState("");
   const [showReplyForm, setShowReplyForm] = useState(false);
 
-  const [openSummarizeDrawer, setOpenSummarizeDrawer] = useState(false);
-  const [summaryContent, setSummaryContent] = useState("");
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-
   const fetchPostDetailsBySlug = async () => {
     try {
       const response = await axiosInstance.get(
-        API_PATHS.POSTS.GET_BY_SLUG(slug)
+        API_PATHS.RECIPE.GET_BY_SLUG(slug)
       );
 
       if (response.data) {
@@ -67,37 +57,10 @@ const RecipeView = () => {
     }
   };
 
-  const generateBlogPostSummary = async () => {
-    try {
-      setErrorMsg("");
-      setSummaryContent(null);
-
-      setIsLoading(true);
-      setOpenSummarizeDrawer(true);
-
-      const response = await axiosInstance.post(
-        API_PATHS.AI.GENERATE_POST_SUMMARY,
-        {
-          content: blogPostData.content || "",
-        }
-      );
-
-      if (response.data) {
-        setSummaryContent(response.data);
-      }
-    } catch (error) {
-      setSummaryContent(null);
-      setErrorMsg("Failed to generate summary. Try again later");
-      console.error("Error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const incrementViews = async (postId) => {
     if (!postId) return;
     try {
-      await axiosInstance.post(API_PATHS.POSTS.INCREMENT_VIEW(postId));
+      await axiosInstance.post(API_PATHS.RECIPE.INCREMENT_VIEW(postId));
     } catch (error) {
       console.error("Error:", error);
     }
@@ -140,8 +103,8 @@ const RecipeView = () => {
           <meta property="og:image" content={blogPostData.coverImageUrl} />
           <meta property="og:type" content="article" />
 
-          <div className="grid grid-cols-12 gap-8 relative">
-            <div className="colp12 md:col-span-8 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 relative">
+            <div className="col-span-1 lg:col-span-8 relative">
               <h1 className="text-lg md:text-2xl font-bold mb-2 line-clamp-3">
                 {blogPostData.title}
               </h1>
@@ -154,39 +117,119 @@ const RecipeView = () => {
                   {blogPostData.tags.slice(0, 3).map((tag, index) => (
                     <button
                       key={index}
-                      className="bg-sky-200/50 text-sky-800/80 text-xs font-medium px-3 py-0.5 rounded-full text-nowrap cursor-pointer"
+                      className="bg-orange-200/50 text-orange-800/80 text-xs font-medium px-2 sm:px-3 py-0.5 rounded-full text-nowrap cursor-pointer hover:bg-orange-300/70 hover:text-orange-900 transition-all duration-200 hover:scale-105"
                       onClick={(e) => {
                         e.stopPropagation();
+                        console.log("Navigating to tag:", tag);
                         navigate(`/tag/${tag}`);
                       }}
+                      title={`${tag} tariflerini görüntüle`}
                     >
                       # {tag}
                     </button>
                   ))}
                 </div>
-                <LuDot className="text-xl text-gray-400" />
-                <button
-                  className="flex items-center gap-2 bg-linear-to-r from-sky-500 to-cyan-400 text-xs text-white font-medium px-3 py-0.5 rounded-full text-nowrap cursor-pointer hover:scale-[1.02] transition-all my-1"
-                  onClick={generateBlogPostSummary}
-                >
-                  <LuSparkles /> Summarize Post
-                </button>
               </div>
               <img
                 src={blogPostData.coverImageUrl || ""}
                 alt={blogPostData.title}
                 className="w-full h-96 object-cover mb-6 rounded-lg"
               />
+
+              {/* Recipe Info */}
+              <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  {blogPostData.duration && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                        <span className="text-orange-600 font-semibold text-sm">
+                          ⏱️
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">
+                          Hazırlanma Süresi
+                        </p>
+                        <p className="font-semibold">
+                          {blogPostData.duration} dakika
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {blogPostData.dietType && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <span className="text-green-600 font-semibold text-sm">
+                          🥗
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Diyet Türü</p>
+                        <p className="font-semibold">{blogPostData.dietType}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Ingredients Section */}
+                {blogPostData.ingredients &&
+                  blogPostData.ingredients.length > 0 && (
+                    <div className="mb-8">
+                      <h3 className="text-xl font-bold mb-4 text-gray-800">
+                        🥄 Malzemeler
+                      </h3>
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <ul className="space-y-2">
+                          {blogPostData.ingredients.map((ingredient, index) => (
+                            <li key={index} className="flex items-center gap-3">
+                              <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                              <span className="font-medium">
+                                {ingredient.amount}
+                              </span>
+                              <span>{ingredient.name}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                {/* Steps Section */}
+                {blogPostData.steps && blogPostData.steps.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-xl font-bold mb-4 text-gray-800">
+                      👨‍🍳 Hazırlanışı
+                    </h3>
+                    <div className="space-y-4">
+                      {blogPostData.steps.map((step, index) => (
+                        <div key={index} className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex gap-4">
+                            <span className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                              {index + 1}
+                            </span>
+                            <p className="text-gray-700 leading-relaxed">
+                              {step}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="">
-                <MarkDownContent
-                  content={sanitizeMarkdown(blogPostData?.content || "")}
-                />
                 <ShareRecipe title={blogPostData.title} />
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-lg font-semibold">Comments</h4>
+
+                {/* Comments Section */}
+                <div className="bg-gray-50 rounded-lg p-3 sm:p-4 lg:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <h4 className="text-lg font-semibold">
+                      Yorumlar ({comments?.length || 0})
+                    </h4>
                     <button
-                      className="flex items-center justify-center gap-3 bg-linear-to-r from-sky-500 to-cyan-400 text-xs font-semibold text-white px-5 py-2 rounded-full hover:bg-black hover:text-white cursor-pointer"
+                      className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-xs sm:text-sm font-semibold text-white px-4 py-2.5 rounded-full hover:from-orange-600 hover:to-amber-600 transition-all duration-200 whitespace-nowrap"
                       onClick={() => {
                         if (!user) {
                           setOpenAuthForm(true);
@@ -195,14 +238,14 @@ const RecipeView = () => {
                         setShowReplyForm(true);
                       }}
                     >
-                      Add Comment
+                      Yorum Ekle
                     </button>
                   </div>
                   {showReplyForm && (
-                    <div className="bg-white pt-1 pb-5 pr-8 rounded-lg mb-8 ">
+                    <div className="bg-white rounded-lg p-3 sm:p-4 mb-6">
                       <CommentReplyInput
                         user={user}
-                        authorName={user.name}
+                        authorName={user?.name || "User"}
                         content={""}
                         replyText={replyText}
                         setReplyText={setReplyText}
@@ -213,59 +256,50 @@ const RecipeView = () => {
                       />
                     </div>
                   )}
-                  {comments?.length > 0 &&
-                    comments.map((comment) => (
-                      <CommentInfoCard
-                        key={comment._id}
-                        commentId={comment._id || null}
-                        authorName={comment.author.name}
-                        authorPhoto={comment.author.profileImageUrl}
-                        content={comment.content}
-                        updatedOn={
-                          comment.updatedAt
-                            ? moment(comment.updatedAt).format("Do MMM YYYY")
-                            : "-"
-                        }
-                        post={comment.post}
-                        replies={comment.replies || []}
-                        getAllComments={() =>
-                          fetchCommentByPostId(blogPostData._id)
-                        }
-                        // onDelete={(commentId) =>
-                        //   setOpenDeleteAlert({
-                        //     open: true,
-                        //     data: commentId || comment._id,
-                        //   })
-                        // }
-                      />
-                    ))}
+                  {/* Comments List */}
+                  <div className="space-y-4">
+                    {comments?.length > 0 ? (
+                      comments.map((comment) => (
+                        <CommentInfoCard
+                          key={comment._id}
+                          commentId={comment._id}
+                          authorName={comment.author?.name || "Unknown"}
+                          authorPhoto={comment.author?.profileImageUrl}
+                          authorId={comment.author?._id || comment.author?.id}
+                          content={comment.content}
+                          updatedOn={
+                            comment.updatedAt
+                              ? moment(comment.updatedAt).format("Do MMM YYYY")
+                              : "-"
+                          }
+                          post={blogPostData}
+                          replies={comment.replies || []}
+                          getAllComments={() =>
+                            fetchCommentByPostId(blogPostData._id)
+                          }
+                          isSubReply={false}
+                        />
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500 text-sm">
+                          Henüz yorum yok. İlk yorumu sen yap!
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <LikeCommentButton
                 postId={blogPostData._id || ""}
-                likes={blogPostData.likes || 0}
+                likes={blogPostData.likes || []}
                 comments={comments?.length || 0}
               />
             </div>
-            <div className="col-span-12 md:col-span-4">
+            <div className="col-span-1 lg:col-span-4">
               <TrendingRecipesSection />
             </div>
           </div>
-          <Drawer
-            isOpen={openSummarizeDrawer}
-            onClose={() => setOpenSummarizeDrawer(false)}
-            title={!isLoading && summaryContent?.title}
-          >
-            {errorMsg && (
-              <p className="flex gap-2 text-sm text-amber-600 font-medium">
-                <LuCircleAlert className="mt-1" /> {errorMsg}
-              </p>
-            )}
-            {isLoading && <SkeletonLoader />}
-            {!isLoading && summaryContent && (
-              <MarkDownContent content={summaryContent?.summary || " "} />
-            )}
-          </Drawer>
         </>
       )}
     </RecipeLayout>

@@ -9,6 +9,7 @@ const createRecipe = async (req, res) => {
     const {
       title,
       ingredients,
+      steps,
       dietType,
       duration,
       coverImageUrl,
@@ -17,10 +18,15 @@ const createRecipe = async (req, res) => {
       generatedByAI,
     } = req.body;
 
+    console.log("🔍 Backend'e gelen veriler:");
+    console.log("📝 Steps:", steps);
+    console.log("📦 Full body:", req.body);
+
     const newRecipe = new Recipe({
       title,
       slug: slugify(title, { lower: true }),
       ingredients,
+      steps,
       dietType,
       duration,
       coverImageUrl,
@@ -58,6 +64,11 @@ const updateRecipe = async (req, res) => {
     if (updatedData.title) {
       updatedData.slug = slugify(updatedData.title, { lower: true });
     }
+
+    console.log("🔄 Update işlemi - Backend'e gelen veriler:");
+    console.log("📝 Steps:", updatedData.steps);
+    console.log("📦 Full updatedData:", updatedData);
+
     const updatedRecipe = await Recipe.findByIdAndUpdate(
       req.params.id,
       updatedData,

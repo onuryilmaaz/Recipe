@@ -4,7 +4,7 @@ import { API_PATHS } from "../utils/apiPaths";
 
 export const UserContext = createContext();
 
-const UserProvider = ({ children }) => {
+export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openAuthForm, setOpenAuthForm] = useState(false);
@@ -40,7 +40,6 @@ const UserProvider = ({ children }) => {
 
   const clearUser = () => {
     setUser(null);
-    setSearchResults([]);
     localStorage.removeItem("token");
   };
 
@@ -56,8 +55,7 @@ const UserProvider = ({ children }) => {
         setOpenAuthForm,
       }}
     >
-      {" "}
-      {children}{" "}
+      {children}
     </UserContext.Provider>
   );
 };

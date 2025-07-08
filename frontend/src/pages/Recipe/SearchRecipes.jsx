@@ -16,7 +16,7 @@ const SearchRecipes = () => {
 
   const handleSearch = async () => {
     try {
-      const response = await axiosInstance.get(API_PATHS.POSTS.SEARCH, {
+      const response = await axiosInstance.get(API_PATHS.RECIPE.SEARCH, {
         params: { q: query },
       });
       if (response.data) {
@@ -41,8 +41,7 @@ const SearchRecipes = () => {
     <RecipeLayout>
       <div>
         <h3 className="text-lg font-medium">
-          Showing search results matching "
-          <span className="font-semibold">{query}</span>"
+          "<span className="font-semibold">{query}</span>" için arama sonuçları
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           {searchResults.length > 0 &&
@@ -51,15 +50,23 @@ const SearchRecipes = () => {
                 key={item._id}
                 title={item.title}
                 coverImageUrl={item.coverImageUrl}
-                description={item.description}
+                description={
+                  item.steps && item.steps.length > 0
+                    ? item.steps.slice(0, 1).join(" ")
+                    : "Nefis bir tarif sizi bekliyor..."
+                }
                 tags={item.tags}
+                duration={item.duration}
+                dietType={item.dietType}
+                views={item.views}
+                likes={item.likes}
                 updatedOn={
                   item.updatedAt
                     ? moment(item.updatedAt).format("Do MMM YYYY")
                     : "-"
                 }
-                authorName={item.author.name}
-                authProfileImg={item.author.profileImageUrl}
+                authorName={item.author?.name || "Yönetici"}
+                authProfileImg={item.author?.profileImageUrl || ""}
                 onClick={() => handleClick(item)}
               />
             ))}

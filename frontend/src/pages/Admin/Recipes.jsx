@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import DashboardLayout from "../../components/layouts/DashboardLayout";
-import { LuGalleryVerticalEnd, LuLoaderCircle, LuPlus } from "react-icons/lu";
+import { LuGalleryVerticalEnd, LuPlus } from "react-icons/lu";
+import ModernLoader from "../../components/Loader/ModernLoader";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
@@ -16,8 +17,8 @@ const Recipes = () => {
   const navigate = useNavigate();
 
   const [tabs, setTabs] = useState([]);
-  const [filterStatus, setFilterStatus] = useState("All");
-  const [blogPostList, setBlogPostList] = useState([]);
+  const [filterStatus, setFilterStatus] = useState("published");
+  const [recipeList, setRecipeList] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,20 +27,20 @@ const Recipes = () => {
     data: null,
   });
 
-  const getAllPosts = async (pageNumber = 1) => {
+  const getAllRecipes = async (pageNumber = 1) => {
     try {
       setIsLoading(true);
-      const response = await axiosInstance.get(API_PATHS.POSTS.GET_ALL, {
+      const response = await axiosInstance.get(API_PATHS.RECIPE.GET_ALL, {
         params: {
-          status: filterStatus.toLocaleLowerCase(),
+          status: filterStatus,
           page: pageNumber,
         },
       });
 
-      const { posts, totalPages, counts } = response.data;
+      const { recipes, totalPages, counts } = response.data;
 
-      setBlogPostList((prevPosts) =>
-        pageNumber === 1 ? posts : [...prevPosts, ...posts]
+      setRecipeList((prevRecipes) =>
+        pageNumber === 1 ? recipes : [...prevRecipes, ...recipes]
       );
       setTotalPages(totalPages);
       setPage(pageNumber);
@@ -47,9 +48,9 @@ const Recipes = () => {
       const statusSummary = counts || {};
 
       const statusArray = [
-        { label: "All", count: statusSummary.all || 0 },
-        { label: "Published", count: statusSummary.published || 0 },
-        { label: "Draft", count: statusSummary.draft || 0 },
+        { label: "Yayınlanan", count: statusSummary.published || 0 },
+        { label: "Taslak", count: statusSummary.draft || 0 },
+        { label: "Tümü", count: statusSummary.all || 0 },
       ];
 
       setTabs(statusArray);
@@ -60,42 +61,42 @@ const Recipes = () => {
     }
   };
 
-  const deletePost = async (postId) => {
+  const deleteRecipe = async (recipeId) => {
     try {
-      await axiosInstance.delete(API_PATHS.POSTS.DELETE(postId));
+      await axiosInstance.delete(API_PATHS.RECIPE.DELETE(recipeId));
 
-      toast.success("Blog Post Deleted Successfully");
+      toast.success("Tarif Başarıyla Silindi");
       setOpenDeleteAlert({
         open: false,
         data: null,
       });
-      getAllPosts();
+      getAllRecipes();
     } catch (error) {
-      console.error("Error deleting blog post:", error);
+      console.error("Error deleting recipe:", error);
     }
   };
 
   const handleLoadMore = () => {
     if (page < totalPages) {
-      getAllPosts(page + 1);
+      getAllRecipes(page + 1);
     }
   };
 
   useEffect(() => {
-    getAllPosts(1);
+    getAllRecipes(1);
     return () => {};
   }, [filterStatus]);
 
   return (
-    <DashboardLayout activeMenu="Blog Posts">
+    <DashboardLayout activeMenu="Recipes">
       <div className="w-auto sm:max-w-[900px] mx-auto">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold mt-5 mb-5">Blog Posts</h2>
+          <h2 className="text-2xl font-semibold mt-5 mb-5">Tarifler</h2>
           <button
             className="btn-small"
             onClick={() => navigate("/admin/create")}
           >
-            <LuPlus className="text-[18px]" /> Create Post
+            <LuPlus className="text-[18px]" /> Tarif Oluştur
           </button>
         </div>
 
@@ -105,38 +106,47 @@ const Recipes = () => {
           setActiveTab={setFilterStatus}
         />
         <div className="mt-5">
-          {blogPostList.map((post) => (
+          {recipeList.map((recipe) => (
             <RecipeSummaryCard
-              key={post._id}
-              title={post.title}
-              imgUrl={post.coverImageUrl}
+              key={recipe._id}
+              title={recipe.title}
+              coverImageUrl={recipe.coverImageUrl}
+              description={
+                recipe.steps && recipe.steps.length > 0
+                  ? recipe.steps.slice(0, 1).join(" ")
+                  : "Nefis bir tarif sizi bekliyor..."
+              }
+              tags={recipe.tags}
+              duration={recipe.duration}
+              dietType={recipe.dietType}
+              views={recipe.views}
               updatedOn={
-                post.updatedAt
-                  ? moment(post.updatedAt).format("Do MMM YYYY")
+                recipe.updatedAt
+                  ? moment(recipe.updatedAt).format("Do MMM YYYY")
                   : "-"
               }
-              tags={post.tags}
-              likes={post.likes}
-              views={post.views}
-              onClick={() => navigate(`/admin/edit/${post.slug}`)}
+              authorName={recipe.author?.name || "Yönetici"}
+              authProfileImg={recipe.author?.profileImageUrl || ""}
+              onClick={() => navigate(`/admin/edit/${recipe.slug}`)}
               onDelete={() =>
-                setOpenDeleteAlert({ open: true, data: post._id })
+                setOpenDeleteAlert({ open: true, data: recipe._id })
               }
+              isAdminView={true}
             />
           ))}
           {page < totalPages && (
             <div className="flex items-center justify-center mb-8">
               <button
-                className="flex items-center gap-3 text-sm text-white font-medium bg-black px-7 py-2.5 rounded-full text-nowrap hover:scale-105 transition-all cursor-pointer"
+                className="flex items-center gap-3 text-sm text-white font-medium bg-orange-500 px-7 py-2.5 rounded-full text-nowrap hover:scale-105 hover:bg-orange-600 transition-all cursor-pointer"
                 disabled={isLoading}
                 onClick={handleLoadMore}
               >
                 {isLoading ? (
-                  <LuLoaderCircle className="animate-spin text-[15px] " />
+                  <ModernLoader size="small" type="spinner" color="white" />
                 ) : (
                   <LuGalleryVerticalEnd className="text-lg" />
                 )}{" "}
-                {isLoading ? "Loading.." : "Load More"}
+                {isLoading ? "Yükleniyor.." : "Daha Fazla Yükle"}
               </button>
             </div>
           )}
@@ -148,12 +158,12 @@ const Recipes = () => {
         onClose={() => {
           setOpenDeleteAlert({ open: false, data: null });
         }}
-        title="Delete Alert"
+        title="Silme Uyarısı"
       >
         <div className="w-[70vw] md:w-[30vw]">
           <DeleteAlertContent
-            content="Are you sure you want to delete this blog post?"
-            onDelete={() => deletePost(openDeleteAlert.data)}
+            content="Bu tarifi silmek istediğinizden emin misiniz?"
+            onDelete={() => deleteRecipe(openDeleteAlert.data)}
           />
         </div>
       </Modal>

@@ -3,6 +3,7 @@ import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import SideMenu from "./SideMenu";
 
 import LOGO from "../../assets/logo.png";
+import { Link } from "react-router-dom";
 
 const Navbar = ({ activeMenu }) => {
   const [openSideMenu, setOpenSideMenu] = useState(false);
@@ -20,7 +21,9 @@ const Navbar = ({ activeMenu }) => {
           <HiOutlineMenu className="text-2xl" />
         )}
       </button>
-      <img src={LOGO} alt="logo" className="h-[24px] md:h-[26px]" />
+      <Link to="/">
+        <img src={LOGO} alt="logo" className="h-[24px] md:h-[26px]" />
+      </Link>
       {openSideMenu && (
         <div className="fixed top-[61px] -ml-4 bg-white">
           <SideMenu activeMenu={activeMenu} setOpenSideMenu={setOpenSideMenu} />

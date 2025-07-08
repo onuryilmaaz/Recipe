@@ -27,17 +27,17 @@ const SignUp = ({ setCurrentPage }) => {
     let profileImageUrl = "";
 
     if (!fullName) {
-      setError("Please enter full name.");
+      setError("Lütfen tam adınızı girin.");
       return;
     }
 
     if (!validateEmail(email)) {
-      setError("Please enter a valid email addess.");
+      setError("Lütfen geçerli bir e-posta adresi girin.");
       return;
     }
 
     if (!password) {
-      setError("Please enter the password.");
+      setError("Lütfen şifrenizi girin.");
       return;
     }
 
@@ -84,9 +84,9 @@ const SignUp = ({ setCurrentPage }) => {
   return (
     <div className="flex items-center h-auto md:h-[520px]">
       <div className="w-[90vw] md:w-[43vw] p-7 flex flex-col justify-center">
-        <h3 className="text-lg font-semibold text-black">Create an Account</h3>
+        <h3 className="text-lg font-semibold text-black">Hesap Oluştur</h3>
         <p className="text-xs text-slate-700 mt-[5px] mb-6">
-          Join us today by entering your details below.
+          Aşağıdaki bilgileri girerek bugün bize katılın.
         </p>
         <form onSubmit={handleSignUp}>
           <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
@@ -95,21 +95,21 @@ const SignUp = ({ setCurrentPage }) => {
             <Input
               value={fullName}
               onChange={({ target }) => setFullName(target.value)}
-              label="Full Name"
+              label="Tam Ad"
               placaholder="John"
               type="text"
             />
             <Input
               value={email}
               onChange={({ target }) => setEmail(target.value)}
-              label="Email Address"
+              label="E-posta Adresi"
               placaholder="john@example.com"
               type="text"
             />
             <Input
               value={password}
               onChange={({ target }) => setPassword(target.value)}
-              label="Password"
+              label="Şifre"
               placaholder="Min 8 Characters"
               type="password"
             />
@@ -123,23 +123,23 @@ const SignUp = ({ setCurrentPage }) => {
           </div>
           {error && <p className="text-red-500 text-xs pb-2.5"> {error} </p>}
           <button type="submit" className="btn-primary">
-            SIGN UP
+            KAYIT OL
           </button>
           <p className="text-[13px] text-slate-800 mt-3">
-            Already an account?{" "}
+            Zaten hesabınız var mı?{" "}
             <button
-              className="font-medium text-primary underline cursor-pointer"
+              className="font-medium text-orange-500 underline cursor-pointer hover:text-orange-600"
               onClick={() => {
                 setCurrentPage("login");
               }}
             >
-              Login
+              Giriş
             </button>
           </p>
         </form>
       </div>
       <div className="hidden md:block ">
-        <img src={AUTH_IMG} alt="Login" className="h-[520px] w-[33vw]" />
+        <img src={AUTH_IMG} alt="Kayıt" className="h-[520px] w-[33vw]" />
       </div>
     </div>
   );

@@ -4,7 +4,9 @@
 @theme {
   --font-display: "Urbanist", sans-serif;
   --breakpoint-3xl: 1920px;
-  --color-primary: #00a7f3;
+  --color-primary: #f97316;
+  --color-primary-light: #fb923c;
+  --color-primary-dark: #ea580c;
 }
 
 @layer base {
@@ -12,7 +14,7 @@
     font-family: var(--font-display);
   }
   body {
-    background-color: #f7fafe;
+    background-color: #fef7f0;
     overflow-x: hidden;
   }
 }
@@ -43,26 +45,26 @@
 
 /* hover effect  */
 .w-md-editor-toolbar li > button:hover {
-  color: #681db8 !important; /*hover color*/
-  background-color: #e9d4ff !important;
+  color: #ea580c !important; /*hover color*/
+  background-color: #fed7aa !important;
   border-radius: 6px;
 }
 
 /* active/focused icon style  */
 .w-md-editor-toolbar li > button:focus {
   outline: none;
-  color: #007a99 !important;
-  background-color: #d0f4ff !important;
+  color: #f97316 !important;
+  background-color: #ffedd5 !important;
 }
 
 .input-box {
-  @apply w-full flex justify-between gap-3 text-sm text-black bg-gray-50/50 rounded px-4 py-3 mb-4 mt-3 border border-gray-100 outline-none focus-within:border-sky-300;
+  @apply w-full flex justify-between gap-3 text-sm text-black bg-gray-50/50 rounded px-4 py-3 mb-4 mt-3 border border-gray-100 outline-none focus-within:border-orange-300;
 }
 .btn-primary {
-  @apply w-full flex items-center justify-center gap-3 text-sm font-semibold text-white bg-linear-to-r from-sky-500 to-cyan-400 p-[10px] rounded-md my-1 transition-all hover:scale-[1.01] hover:text-white cursor-pointer;
+  @apply w-full flex items-center justify-center gap-3 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-orange-400 p-[10px] rounded-md my-1 transition-all hover:scale-[1.01] hover:text-white cursor-pointer;
 }
 .btn-small {
-  @apply flex items-center justify-center gap-3 bg-linear-to-r from-sky-500 to-cyan-400 text-sm font-semibold text-white px-7 py-2 rounded-lg hover:bg-black hover:text-white transition-colors cursor-pointer hover:shadow-2xl hover:shadow-sky-200;
+  @apply flex items-center justify-center gap-3 bg-gradient-to-r from-orange-500 to-orange-400 text-sm font-semibold text-white px-7 py-2 rounded-lg hover:bg-orange-600 hover:text-white transition-colors cursor-pointer hover:shadow-2xl hover:shadow-orange-200;
 }
 .form-card {
   @apply bg-white rounded-xl shadow-xl shadow-gray-50 border border-gray-200/50;
