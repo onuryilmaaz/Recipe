@@ -7,6 +7,12 @@ const RecipeSummaryCard = ({
   tags,
   likes,
   views,
+  duration,
+  dietType,
+  description,
+  authorName,
+  authProfileImg,
+  isAdminView,
   onClick,
   onDelete,
 }) => {
@@ -21,6 +27,30 @@ const RecipeSummaryCard = ({
           {" "}
           {title}{" "}
         </h3>
+
+        {/* Duration and Diet Type */}
+        <div className="flex items-center gap-3 mt-1.5 mb-2 text-xs text-gray-600">
+          {duration && (
+            <span className="flex items-center gap-1">
+              <span>⏱️</span>
+              {duration} dk
+            </span>
+          )}
+          {dietType && (
+            <span className="flex items-center gap-1">
+              <span>🥗</span>
+              {dietType}
+            </span>
+          )}
+        </div>
+
+        {/* Description */}
+        {description && (
+          <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+            {description}
+          </p>
+        )}
+
         <div className="flex items-center gap-2.5 mt-2 flex-wrap">
           <div className="text-[11px] text-gray-700 font-medium bg-gray-100 px-2.5 py-1 rounded">
             Updated: {updatedOn}
@@ -28,10 +58,11 @@ const RecipeSummaryCard = ({
           <div className="h-6 w-[1px] bg-gray-300/70 " />
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1.5 text-xs text-orange-700 font-medium bg-orange-50 px-2.5 py-1 rounded">
-              <LuEye className="text-[16px] text-orange-500" /> {views}
+              <LuEye className="text-[16px] text-orange-500" /> {views || 0}
             </span>
             <span className="flex items-center gap-1.5 text-xs text-red-700 font-medium bg-red-50 px-2.5 py-1 rounded">
-              <LuHeart className="text-[16px] text-red-500" /> {likes}
+              <LuHeart className="text-[16px] text-red-500" />{" "}
+              {Array.isArray(likes) ? likes.length : likes || 0}
             </span>
           </div>
           <div className="h-6 w-[1px] bg-gray-300/70 " />
@@ -47,16 +78,18 @@ const RecipeSummaryCard = ({
           </div>
         </div>
       </div>
-      <button
-        className="hidden md:group-hover:flex items-center gap-2 text-xs text-rose-500 font-medium bg-rose-50 px-3 py-1 rounded text-nowrap border border-rose-100 hover:border-rose-200 cursor-pointer"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-      >
-        <LuTrash2 className="" />{" "}
-        <span className="hidden md:block">Delete</span>
-      </button>
+      {isAdminView && (
+        <button
+          className="hidden md:group-hover:flex items-center gap-2 text-xs text-rose-500 font-medium bg-rose-50 px-3 py-1 rounded text-nowrap border border-rose-100 hover:border-rose-200 cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+        >
+          <LuTrash2 className="" />{" "}
+          <span className="hidden md:block">Sil</span>
+        </button>
+      )}
     </div>
   );
 };

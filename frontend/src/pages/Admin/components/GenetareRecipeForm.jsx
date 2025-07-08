@@ -89,8 +89,18 @@ const GenetareRecipeForm = ({
       const recipeTitle = generatedRecipe.title || title;
       const recipeIngredients = generatedRecipe.ingredients || [];
       const recipeSteps = generatedRecipe.steps || [];
+      const recipeDuration = generatedRecipe.duration || null;
+      const recipeDietType = generatedRecipe.dietType || null;
 
-      setRecipeContent(recipeTitle, recipeIngredients, recipeSteps);
+
+
+      setRecipeContent(
+        recipeTitle,
+        recipeIngredients,
+        recipeSteps,
+        recipeDuration,
+        recipeDietType
+      );
       handleCloseForm();
     } catch (error) {
       console.error("Recipe generation error:", error);
@@ -125,7 +135,9 @@ const GenetareRecipeForm = ({
         setRecipeContent(
           fallbackRecipe.title,
           fallbackRecipe.ingredients,
-          fallbackRecipe.steps
+          fallbackRecipe.steps,
+          30, // Default duration: 30 minutes
+          "Normal" // Default dietType: Normal
         );
         handleCloseForm();
       }
@@ -248,7 +260,7 @@ const GenetareRecipeForm = ({
           {isLoading ? (
             <ModernLoader size="small" type="spinner" color="white" />
           ) : null}
-                      {isLoading ? "Tarif Üretiliyor..." : "Tarif Üret"}
+          {isLoading ? "Tarif Üretiliyor..." : "Tarif Üret"}
         </button>
       </form>
     </div>

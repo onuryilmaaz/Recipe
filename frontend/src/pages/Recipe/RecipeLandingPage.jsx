@@ -30,6 +30,8 @@ const RecipeLandingPage = () => {
 
       const { recipes, totalPages } = response.data;
 
+
+
       setBlogPostList((prevPosts) =>
         pageNumber === 1 ? recipes : [...prevPosts, ...recipes]
       );

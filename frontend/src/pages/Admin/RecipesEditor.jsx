@@ -210,7 +210,10 @@ const RecipesEditor = ({ isEdit }) => {
 
       console.log("🔍 Frontend'den gönderilen veriler:");
       console.log("📝 Steps:", recipeData.steps);
-      console.log("📝 Filtered Steps:", recipeData.steps.filter((step) => step.trim()));
+      console.log(
+        "📝 Filtered Steps:",
+        recipeData.steps.filter((step) => step.trim())
+      );
       console.log("📦 Full payload:", reqPayload);
 
       const response = isEdit
@@ -570,13 +573,16 @@ const RecipesEditor = ({ isEdit }) => {
       >
         <GenetareRecipeForm
           contentParams={openRecipeGenForm?.data || null}
-          setRecipeContent={(title, ingredients, steps) => {
+          setRecipeContent={(title, ingredients, steps, duration, dietType) => {
             const recipeInfo = openRecipeGenForm?.data || null;
+
             setRecipeData((prevState) => ({
               ...prevState,
               title: title || prevState.title,
               ingredients: ingredients || prevState.ingredients,
               steps: steps || prevState.steps,
+              duration: duration || prevState.duration,
+              dietType: dietType || prevState.dietType,
               tags: recipeInfo?.tags || prevState.tags,
               generatedByAI: true,
             }));
