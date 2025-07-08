@@ -92,14 +92,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Sayfalanmış tarif listesi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAllRecipesResponse"
-                }
-              }
-            }
+            "description": "Başarılı yanıt. Tarif listesini ve sayfalama bilgilerini içerir."
+          },
+          "500": {
+            "description": "Sunucu hatası"
           }
         }
       },
@@ -220,7 +216,7 @@
       }
     },
     "/api/recipes/{id}/view": {
-      "put": {
+      "post": {
         "tags": ["Recipes"],
         "summary": "Tarifin görüntülenme sayısını bir artırır",
         "parameters": [
@@ -235,7 +231,7 @@
       }
     },
     "/api/recipes/{id}/like": {
-      "put": {
+      "post": {
         "tags": ["Recipes"],
         "summary": "Tarifin beğeni sayısını bir artırır",
         "security": [{ "bearerAuth": [] }],
@@ -298,6 +294,45 @@
       }
     },
     "/api/comments/{commentId}": {
+      "put": {
+        "tags": ["Comments"],
+        "summary": "Bir yorumu günceller",
+        "description": "Sadece yorumun sahibi bu işlemi yapabilir.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Güncellenecek yorumun ID'si"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "description": "Yorumun yeni metni"
+                  }
+                },
+                "required": ["content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Yorum başarıyla güncellendi" },
+          "403": {
+            "description": "Kullanıcının bu yorumu güncelleme yetkisi yok"
+          },
+          "404": { "description": "Yorum bulunamadı" }
+        }
+      },
       "delete": {
         "tags": ["Comments"],
         "summary": "Bir yorumu ve altındaki yanıtları siler",
@@ -329,6 +364,10 @@
               "schema": { "$ref": "#/components/schemas/AICreateRecipePayload" }
             }
           }
+        },
+        "responses": {
+          "200": { "description": "Oluşturulan tarif adımları" },
+          "400": { "description": "Eksik başlık veya malzeme" }
         }
       }
     },
@@ -351,22 +390,13 @@
         }
       }
     },
-    "/api/dashboard/summary": {
+    "/api/dashboard-summary": {
       "get": {
         "tags": ["Dashboard"],
         "summary": "Yönetim paneli için özet verileri getirir",
         "security": [{ "bearerAuth": [] }],
         "responses": {
-          "200": {
-            "description": "Dashboard özeti",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DashboardSummaryResponse"
-                }
-              }
-            }
-          }
+          "200": { "description": "Dashboard özeti" }
         }
       }
     }

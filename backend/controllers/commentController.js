@@ -107,6 +107,43 @@ const getCommentsByRecipe = async (req, res) => {
   }
 };
 
+// @desc   Update a comment (author only)
+// @route  PUT /api/comments/:commentId
+// @access Private
+const updateComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ message: "Content cannot be empty" });
+    }
+
+    const comment = await Comment.findById(commentId);
+
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    if (comment.author.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "User not authorized to update this comment" });
+    }
+
+    comment.content = content;
+    const updatedComment = await comment.save();
+
+    await updatedComment.populate("author", "name profileImageUrl");
+
+    res.json(updatedComment);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to update comment", error: error.message });
+  }
+};
+
 // @desc   Delete a comment and its replies (author or admin only)
 // @route  DELETE /api/comments/:commentId
 // @access Public
@@ -134,5 +171,6 @@ module.exports = {
   addComment,
   getAllComments,
   getCommentsByRecipe,
+  updateComment,
   deleteComment,
 };

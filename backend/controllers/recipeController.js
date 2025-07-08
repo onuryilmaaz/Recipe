@@ -47,7 +47,7 @@ const updateRecipe = async (req, res) => {
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ message: "Recipe not found" });
     if (
-      post.author.toString() !== req.user._id.toString() &&
+      recipe.author.toString() !== req.user._id.toString() &&
       !req.user.isAdmin
     ) {
       return res
@@ -168,14 +168,9 @@ const getRecipesByTags = async (req, res) => {
 const searchRecipes = async (req, res) => {
   try {
     const q = req.query.q;
-    const recipes = await Recipes.find({
+    const recipes = await Recipe.find({
       isDraft: false,
-      $or: [
-        { title: { $regex: q, $options: "i" } },
-        { ingredients: { $regex: q, $options: "i" } },
-        { dietType: { $regex: q, $options: "i" } },
-        { duration: { $regex: q, $options: "i" } },
-      ],
+      $or: [{ title: { $regex: q, $options: "i" } }],
     }).populate("author", "name profileImageUrl");
     res.json(recipes);
   } catch (error) {
