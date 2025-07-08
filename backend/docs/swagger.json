@@ -351,7 +351,7 @@
         }
       }
     },
-    "/api/ai/create-recipe": {
+    "/api/ai/generate-from-ingredients": {
       "post": {
         "tags": ["AI"],
         "summary": "Malzemelere göre akıllı ve detaylı tarif oluşturur",
@@ -361,32 +361,43 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/AICreateRecipePayload" }
+              "schema": {
+                "$ref": "#/components/schemas/AICreateRecipePayload"
+              }
             }
           }
         },
         "responses": {
-          "200": { "description": "Oluşturulan tarif adımları" },
-          "400": { "description": "Eksik başlık veya malzeme" }
+          "200": {
+            "description": "Başarılı yanıt. Oluşturulan tam tarifi içerir."
+          },
+          "400": { "description": "Geçerli bir malzeme listesi gönderilmedi." }
         }
       }
     },
-    "/api/ai/auto-fill-steps": {
+    "/api/ai/generate-from-title": {
       "post": {
         "tags": ["AI"],
-        "summary": "Başlık ve malzemelere göre tarif adımları oluşturur",
+        "summary": "Başlık ve etiketlere göre tam bir tarif oluşturur",
+        "description": "Verilen bir başlık ve etiket listesine dayalı olarak AI, tam bir yemek tarifi (malzemeler, adımlar, süre vb.) oluşturur.",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/AIFillStepsPayload" }
+              "schema": {
+                "$ref": "#/components/schemas/AIGenerateFromTitlePayload"
+              }
             }
           }
         },
         "responses": {
-          "200": { "description": "Oluşturulan tarif adımları" },
-          "400": { "description": "Eksik başlık veya malzeme" }
+          "200": {
+            "description": "Başarılı yanıt. Oluşturulan tam tarifi içerir."
+          },
+          "400": {
+            "description": "Geçerli bir başlık ve etiket listesi gönderilmedi."
+          }
         }
       }
     },
@@ -529,11 +540,18 @@
           }
         }
       },
-      "AIFillStepsPayload": {
+      "AIGenerateFromTitlePayload": {
         "type": "object",
         "properties": {
-          "title": { "type": "string" },
-          "ingredients": { "type": "array", "items": { "type": "string" } }
+          "title": {
+            "type": "string",
+            "description": "Oluşturulacak tarifin başlığı."
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tarifin uyması gereken etiketler (örn: 'vegan', 'akşam yemeği')."
+          }
         }
       },
       "GetAllRecipesResponse": {

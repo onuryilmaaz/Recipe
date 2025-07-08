@@ -1,13 +1,15 @@
 const { GoogleGenAI } = require("@google/genai");
-
-const { createRecipePrompt, autoFillStepsPrompt } = require("../utils/prompts");
+const {
+  createRecipePrompt,
+  createRecipeFromTitlePrompt,
+} = require("../utils/prompts");
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// @desc    Malzemelere göre akıllı ve detaylı tarif oluşturur
-// @route   POST /api/ai/create-recipe
+// @desc    Verilen malzemelere göre akıllı ve detaylı tarif oluşturur.
+// @route   POST /api/ai/generate-from-ingredients
 // @access  Public
-const createRecipe = async (req, res) => {
+const generateRecipeFromIngredients = async (req, res) => {
   try {
     const { ingredients, useOnlyGivenIngredients = false } = req.body;
 
@@ -21,13 +23,13 @@ const createRecipe = async (req, res) => {
         .json({ message: "Geçerli bir malzeme listesi gönderilmedi." });
     }
     if (!ai) {
-      return res.status(500).json({ message: "AI service is not available" });
+      return res.status(500).json({ message: "AI servisi mevcut değil." });
     }
 
     const prompt = createRecipePrompt(ingredients, useOnlyGivenIngredients);
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-lite", // Model adını mevcut kodunuzdaki gibi korudum.
+      model: "gemini-2.0-flash-lite",
       contents: prompt,
     });
 
@@ -40,36 +42,31 @@ const createRecipe = async (req, res) => {
 
     res.status(200).json(data);
   } catch (error) {
-    console.error("Tarif oluşturma hatası:", error);
+    console.error("Malzemelerden tarif oluşturma hatası:", error);
     res.status(500).json({
-      message: "Tarif oluşturulurken bir hata meydana geldi.",
+      message: "Malzemelerden tarif oluşturulurken bir hata meydana geldi.",
       error: error.message,
     });
   }
 };
 
-// @desc   Tarif başlığı ve malzemeye göre hazırlanma adımları oluştur
-// @route  POST /api/ai/auto-fill-steps
+// @desc   Tarif başlığı ve etiketlere göre tam bir tarif oluşturur.
+// @route  POST /api/ai/generate-from-title
 // @access Public
-const autoFillSteps = async (req, res) => {
+const generateRecipeFromTitleAndTags = async (req, res) => {
   try {
-    const { title, ingredients } = req.body;
+    const { title, tags } = req.body;
 
-    if (
-      !title ||
-      !ingredients ||
-      !Array.isArray(ingredients) ||
-      ingredients.length === 0
-    ) {
-      return res
-        .status(400)
-        .json({ message: "Missing or invalid title or ingredients" });
+    if (!title || !tags || !Array.isArray(tags) || tags.length === 0) {
+      return res.status(400).json({
+        message: "Geçerli bir başlık ve etiket listesi gönderilmedi.",
+      });
     }
     if (!ai) {
-      return res.status(500).json({ message: "AI service is not available" });
+      return res.status(500).json({ message: "AI servisi mevcut değil." });
     }
 
-    const prompt = autoFillStepsPrompt(title, ingredients);
+    const prompt = createRecipeFromTitlePrompt(title, tags);
 
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash-lite",
@@ -77,22 +74,23 @@ const autoFillSteps = async (req, res) => {
     });
 
     let rawText = response.text;
-    const steps = rawText
-      .split(/\n+/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
+    const cleanedText = rawText
+      .replace(/^```json\s*/i, "")
+      .replace(/```\s*$/i, "")
+      .trim();
+    let data = JSON.parse(cleanedText);
 
-    res.status(200).json({ steps });
+    res.status(200).json(data);
   } catch (error) {
-    console.error("Generate recipe steps error:", error);
+    console.error("Başlıktan tarif oluşturma hatası:", error);
     res.status(500).json({
-      message: "Failed to generate recipe steps",
+      message: "Başlıktan tarif oluşturulurken bir hata meydana geldi.",
       error: error.message,
     });
   }
 };
 
 module.exports = {
-  createRecipe,
-  autoFillSteps,
+  generateRecipeFromIngredients,
+  generateRecipeFromTitleAndTags,
 };
