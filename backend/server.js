@@ -21,11 +21,39 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const app = express();
 
 //Middleware to handle CORS
+const allowedOrigins = [
+  "http://localhost:5173", // Vite dev server
+  "http://localhost:3000", // Alternative dev port
+  "https://your-app-name.vercel.app", // Replace with your Vercel URL
+  "https://*.vercel.app", // Allow all Vercel subdomains
+];
+
 app.use(
   cors({
-    origin: "*",
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, Postman, etc)
+      if (!origin) return callback(null, true);
+
+      // Allow localhost in development
+      if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
+        return callback(null, true);
+      }
+
+      // Allow Vercel domains
+      if (origin.includes(".vercel.app")) {
+        return callback(null, true);
+      }
+
+      // Check against allowed origins
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
 
