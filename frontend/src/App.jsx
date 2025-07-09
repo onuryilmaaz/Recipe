@@ -32,12 +32,12 @@ const App = () => {
           <Routes>
             {/* Default Route */}
             <Route path="/" element={<RecipeLandingPage />} />
-            
+
             {/* Auth Routes */}
             <Route path="/verify-email" element={<EmailVerification />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            
+
             {/* User Pages */}
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/collections" element={<CollectionsPage />} />
@@ -50,9 +50,6 @@ const App = () => {
             <Route path="/profile" element={<UserProfilePage />} />
             <Route path="/search" element={<SearchRecipes />} />
             <Route path="/tag/:tagName" element={<RecipeByTags />} />
-            
-            {/* Recipe Route (must be last to avoid catching other routes) */}
-            <Route path="/:slug" element={<RecipesView />} />
 
             {/* Admin Routes */}
             <Route element={<PrivateRoute allowedRoles={["admin"]} />}>
@@ -69,6 +66,8 @@ const App = () => {
             </Route>
 
             <Route path="/admin-login" element={<AdminLogin />} />
+            {/* Recipe Route (must be last to avoid catching other routes) */}
+            <Route path="/:slug" element={<RecipesView />} />
           </Routes>
         </Router>
         <Toaster
