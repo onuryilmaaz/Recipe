@@ -130,11 +130,36 @@ const getUserById = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const user = await User.findById(userId).select("-password");
+    let user = await User.findById(userId)
+      .select("-password")
+      .populate("following", "name profileImageUrl")
+      .populate("followers", "name profileImageUrl");
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "Kullanıcı bulunamadı",
+      });
+    }
+
+    // Legacy fix: Add missing following/followers arrays for existing users
+    let needsUpdate = false;
+    if (!user.following) {
+      user.following = [];
+      needsUpdate = true;
+    }
+    if (!user.followers) {
+      user.followers = [];
+      needsUpdate = true;
+    }
+
+    // Save if we added missing fields
+    if (needsUpdate) {
+      await User.findByIdAndUpdate(userId, {
+        $set: {
+          following: user.following,
+          followers: user.followers,
+        },
       });
     }
 
@@ -509,10 +534,113 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = { 
-  registerUser, 
-  loginUser, 
-  getUserProfile, 
+// @desc   Follow/Unfollow a user
+// @route  POST /api/auth/follow/:userId
+// @access Private
+const toggleFollow = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const currentUserId = req.user.id;
+
+    if (userId === currentUserId) {
+      return res.status(400).json({
+        success: false,
+        message: "Kendinizi takip edemezsiniz",
+      });
+    }
+
+    const userToFollow = await User.findById(userId);
+    const currentUser = await User.findById(currentUserId);
+
+    if (!userToFollow || !currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Kullanıcı bulunamadı",
+      });
+    }
+
+    // Handle missing arrays for legacy users
+    const currentUserFollowing = currentUser.following || [];
+    const targetUserFollowers = userToFollow.followers || [];
+
+    // Check if already following
+    const isFollowing = currentUserFollowing.includes(userId);
+
+    if (isFollowing) {
+      // Unfollow
+      await User.findByIdAndUpdate(currentUserId, {
+        $pull: { following: userId },
+      });
+      await User.findByIdAndUpdate(userId, {
+        $pull: { followers: currentUserId },
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Takibi bıraktınız",
+        isFollowing: false,
+      });
+    } else {
+      // Follow
+      await User.findByIdAndUpdate(currentUserId, {
+        $addToSet: { following: userId },
+      });
+      await User.findByIdAndUpdate(userId, {
+        $addToSet: { followers: currentUserId },
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Takip ettiniz",
+        isFollowing: true,
+      });
+    }
+  } catch (error) {
+    console.error("Error toggling follow:", error);
+    res.status(500).json({
+      success: false,
+      message: "Takip işleminde hata oluştu",
+    });
+  }
+};
+
+// @desc   Check if current user is following target user
+// @route  GET /api/auth/following/:userId
+// @access Private
+const checkFollowStatus = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const currentUserId = req.user.id;
+
+    const currentUser = await User.findById(currentUserId);
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Kullanıcı bulunamadı",
+      });
+    }
+
+    // Handle missing following array for legacy users
+    const following = currentUser.following || [];
+    const isFollowing = following.includes(userId);
+
+    res.status(200).json({
+      success: true,
+      isFollowing,
+    });
+  } catch (error) {
+    console.error("Error checking follow status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Takip durumu kontrol edilemedi",
+    });
+  }
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  getUserProfile,
   getUserById,
   verifyEmail,
   resendVerificationEmail,
@@ -521,4 +649,6 @@ module.exports = {
   resetPassword,
   updateProfile,
   changePassword,
+  toggleFollow,
+  checkFollowStatus,
 };

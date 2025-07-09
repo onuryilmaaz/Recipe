@@ -14,6 +14,8 @@ const RecipeSummaryCard = ({
   dietType,
   views,
   likes,
+  averageRating = 0,
+  ratingsCount = 0,
   onClick,
   onDelete,
   isAdminView = false,
@@ -100,7 +102,7 @@ const RecipeSummaryCard = ({
             </div>
           </div>
 
-          {/* Views and Likes */}
+          {/* Views, Likes and Rating */}
           <div className="flex items-center gap-3">
             {views !== undefined && (
               <div className="flex items-center gap-1 text-gray-500">
@@ -113,6 +115,14 @@ const RecipeSummaryCard = ({
                 <FaHeart className="text-sm" />
                 <span className="text-xs">
                   {Array.isArray(likes) ? likes.length : likes}
+                </span>
+              </div>
+            )}
+            {averageRating > 0 && (
+              <div className="flex items-center gap-1 text-yellow-500">
+                <span className="text-sm">⭐</span>
+                <span className="text-xs">
+                  {averageRating.toFixed(1)} ({ratingsCount})
                 </span>
               </div>
             )}

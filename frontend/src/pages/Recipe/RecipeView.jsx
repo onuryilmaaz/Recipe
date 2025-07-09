@@ -152,23 +152,21 @@ const RecipeView = () => {
                 className="w-full h-96 object-cover mb-6 rounded-lg"
               />
 
+              {/* Rating Section */}
+              <div className="mb-6">
+                <StarRating
+                  recipeId={blogPostData._id}
+                  averageRating={blogPostData.averageRating || 0}
+                  ratingsCount={blogPostData.ratingsCount || 0}
+                  interactive={true}
+                  size="large"
+                  showCount={true}
+                  onRatingUpdate={fetchPostDetailsBySlug}
+                />
+              </div>
+
               {/* Recipe Info */}
               <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-6">
-                {/* Rating Section */}
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-800">
-                    Bu tarifi değerlendir
-                  </h3>
-                  <StarRating
-                    recipeId={blogPostData._id}
-                    averageRating={blogPostData.averageRating || 0}
-                    ratingsCount={blogPostData.ratingsCount || 0}
-                    interactive={true}
-                    size="large"
-                    showCount={true}
-                    onRatingUpdate={fetchPostDetailsBySlug}
-                  />
-                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   {blogPostData.duration && (

@@ -76,6 +76,9 @@ const RecipeLandingPage = () => {
               duration={blogPostList[0].duration}
               dietType={blogPostList[0].dietType}
               views={blogPostList[0].views}
+              averageRating={blogPostList[0].averageRating || 0}
+              ratingsCount={blogPostList[0].ratingsCount || 0}
+              recipeId={blogPostList[0]._id}
               updatedOn={
                 blogPostList[0].updatedAt
                   ? moment(blogPostList[0].updatedAt).format("Do MMM YYYY")
@@ -105,6 +108,9 @@ const RecipeLandingPage = () => {
                     dietType={item.dietType}
                     views={item.views}
                     likes={item.likes}
+                    averageRating={item.averageRating || 0}
+                    ratingsCount={item.ratingsCount || 0}
+                    recipeId={item._id}
                     updatedOn={
                       item.updatedAt
                         ? moment(item.updatedAt).format("Do MMM YYYY")

@@ -55,8 +55,8 @@ const Dashboard = () => {
         setMaxViews(totalViews);
       }
 
-      if (analyticsResponse.data) {
-        setAnalyticsData(analyticsResponse.data);
+      if (analyticsResponse.data && analyticsResponse.data.success) {
+        setAnalyticsData(analyticsResponse.data.data);
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -153,7 +153,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-                    {/* Overview Stats */}
+          {/* Overview Stats */}
           {analyticsData && analyticsData.overview && (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4 mt-6">
               <DashboardSummaryCard
@@ -165,7 +165,7 @@ const Dashboard = () => {
                 color="text-blue-600"
                 compact
               />
-              
+
               <DashboardSummaryCard
                 icon={<FaUtensils />}
                 label="Toplam Tarif"
@@ -189,7 +189,9 @@ const Dashboard = () => {
               <DashboardSummaryCard
                 icon={<FaEye />}
                 label="Toplam Görüntüleme"
-                value={(analyticsData.overview.totalViews || 0).toLocaleString()}
+                value={(
+                  analyticsData.overview.totalViews || 0
+                ).toLocaleString()}
                 growth={analyticsData.growth?.viewsGrowth || 0}
                 bgColor="bg-purple-100/60"
                 color="text-purple-600"

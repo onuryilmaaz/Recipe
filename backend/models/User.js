@@ -19,6 +19,8 @@ const UserSchema = new mongoose.Schema(
     passwordResetToken: { type: String, default: null },
     passwordResetExpires: { type: Date, default: null },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Recipe" }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   {
     timestamps: true,

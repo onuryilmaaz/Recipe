@@ -44,19 +44,61 @@ const UserProfilePage = () => {
     if (targetUserId) {
       fetchUserProfile();
       fetchUserRecipes();
+      if (currentUser && targetUserId !== currentUser._id) {
+        checkFollowStatus();
+      }
     }
-  }, [targetUserId]);
+  }, [targetUserId, currentUser]);
+
+  // Calculate stats when both userProfile and userRecipes are available
+  useEffect(() => {
+    if (userProfile && userRecipes.length >= 0) {
+      const totalViews = userRecipes.reduce(
+        (sum, recipe) => sum + (recipe.views || 0),
+        0
+      );
+      const totalLikes = userRecipes.reduce(
+        (sum, recipe) => sum + (recipe.likes?.length || 0),
+        0
+      );
+      const avgRating =
+        userRecipes.length > 0
+          ? userRecipes.reduce(
+              (sum, recipe) => sum + (recipe.averageRating || 0),
+              0
+            ) / userRecipes.length
+          : 0;
+
+      setStats({
+        totalRecipes: userRecipes.length,
+        totalViews,
+        totalLikes,
+        avgRating: Math.round(avgRating * 10) / 10,
+        followers: userProfile?.followers?.length || 0,
+        following: userProfile?.following?.length || 0,
+      });
+    }
+  }, [userProfile, userRecipes]);
 
   const fetchUserProfile = async () => {
     try {
-      // For now, we'll use the auth endpoint to get user info
-      // In a real app, you'd have a dedicated user profile endpoint
       const response = await axiosInstance.get(
-        `/api/auth/user/${targetUserId}`
+        API_PATHS.AUTH.GET_USER(targetUserId)
       );
       setUserProfile(response.data);
     } catch (error) {
       console.error("Error fetching user profile:", error);
+    }
+  };
+
+  const checkFollowStatus = async () => {
+    try {
+      const response = await axiosInstance.get(
+        API_PATHS.AUTH.CHECK_FOLLOW(targetUserId)
+      );
+      setIsFollowing(response.data.isFollowing);
+    } catch (error) {
+      console.error("Error checking follow status:", error);
     }
   };
 
@@ -68,32 +110,6 @@ const UserProfilePage = () => {
 
       const recipes = response.data.recipes || [];
       setUserRecipes(recipes);
-
-      // Calculate stats
-      const totalViews = recipes.reduce(
-        (sum, recipe) => sum + (recipe.views || 0),
-        0
-      );
-      const totalLikes = recipes.reduce(
-        (sum, recipe) => sum + (recipe.likes?.length || 0),
-        0
-      );
-      const avgRating =
-        recipes.length > 0
-          ? recipes.reduce(
-              (sum, recipe) => sum + (recipe.averageRating || 0),
-              0
-            ) / recipes.length
-          : 0;
-
-      setStats({
-        totalRecipes: recipes.length,
-        totalViews,
-        totalLikes,
-        avgRating: Math.round(avgRating * 10) / 10,
-        followers: 0, // This would come from a follow system
-        following: 0, // This would come from a follow system
-      });
     } catch (error) {
       console.error("Error fetching user recipes:", error);
     } finally {
@@ -108,21 +124,25 @@ const UserProfilePage = () => {
     }
 
     try {
-      // This would be a real follow/unfollow API call
-      if (isFollowing) {
-        // Unfollow logic
-        setIsFollowing(false);
-        setStats((prev) => ({ ...prev, followers: prev.followers - 1 }));
-        toast.success("Takibi bıraktınız");
-      } else {
-        // Follow logic
-        setIsFollowing(true);
-        setStats((prev) => ({ ...prev, followers: prev.followers + 1 }));
-        toast.success("Takip ettiniz!");
+      const response = await axiosInstance.post(
+        API_PATHS.AUTH.FOLLOW(targetUserId)
+      );
+
+      if (response.data.success) {
+        setIsFollowing(response.data.isFollowing);
+
+        // Update follower count based on action
+        if (response.data.isFollowing) {
+          setStats((prev) => ({ ...prev, followers: prev.followers + 1 }));
+          toast.success("Takip ettiniz!");
+        } else {
+          setStats((prev) => ({ ...prev, followers: prev.followers - 1 }));
+          toast.success("Takibi bıraktınız");
+        }
       }
     } catch (error) {
       console.error("Error toggling follow:", error);
-      toast.error("İşlem gerçekleştirilemedi");
+      toast.error(error.response?.data?.message || "İşlem gerçekleştirilemedi");
     }
   };
 

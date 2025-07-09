@@ -7,6 +7,9 @@ export const API_PATHS = {
     GET_PROFILE: "/api/auth/profile",
     UPDATE_PROFILE: "/api/auth/profile",
     CHANGE_PASSWORD: "/api/auth/change-password",
+    FOLLOW: (userId) => `/api/auth/follow/${userId}`,
+    CHECK_FOLLOW: (userId) => `/api/auth/following/${userId}`,
+    GET_USER: (userId) => `/api/auth/user/${userId}`,
   },
   IMAGE: {
     UPLOAD_IMAGE: "/api/auth/upload-image",

@@ -11,6 +11,8 @@ const {
   resetPassword,
   updateProfile,
   changePassword,
+  toggleFollow,
+  checkFollowStatus,
 } = require("../controllers/authController");
 const { protect } = require("../middlewares/authMiddleware");
 const upload = require("../middlewares/uploadMiddleware");
@@ -33,6 +35,10 @@ router.get("/check-verification", protect, checkEmailVerification);
 // Password reset routes
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
+
+// Follow routes
+router.post("/follow/:userId", protect, toggleFollow);
+router.get("/following/:userId", protect, checkFollowStatus);
 
 router.post("/upload-image", upload.single("image"), (req, res) => {
   if (!req.file) {

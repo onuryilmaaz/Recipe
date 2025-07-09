@@ -62,7 +62,7 @@ const RecipeNavbar = ({ activeMenu }) => {
               <img
                 src={Logo}
                 alt="logo"
-                className="h-[22px] sm:h-[24px] md:h-[26px]"
+                className="h-[28px] sm:h-[30px] md:h-[32px]"
               />
             </Link>
           </div>
@@ -154,11 +154,13 @@ const AuthModel = () => {
       }}
       hideHeader
     >
-      <div className={`w-full mx-auto ${
-        currentPage === "login" 
-          ? "max-w-sm" // Login için daha kompakt
-          : "max-w-md" // SignUp için standart boyut
-      }`}>
+      <div
+        className={`w-full mx-auto ${
+          currentPage === "login"
+            ? "max-w-sm" // Login için daha kompakt
+            : "max-w-md" // SignUp için standart boyut
+        }`}
+      >
         {currentPage === "login" && <Login setCurrentPage={setCurrentPage} />}
         {currentPage === "signup" && <SignUp setCurrentPage={setCurrentPage} />}
       </div>

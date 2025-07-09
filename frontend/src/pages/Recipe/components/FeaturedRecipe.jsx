@@ -1,3 +1,5 @@
+
+
 const FeaturedRecipe = ({
   title,
   coverImageUrl,
@@ -9,18 +11,21 @@ const FeaturedRecipe = ({
   duration,
   dietType,
   views,
+  averageRating = 0,
+  ratingsCount = 0,
+  recipeId,
   onClick,
 }) => {
   return (
     <div
-      className="grid grid-cols-12 bg-white shadow-lg shadow-gray-100 rounded-xl overflow-hidden cursor-pointer"
+      className="grid grid-cols-12 bg-white shadow-lg shadow-gray-100 rounded-xl overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300"
       onClick={onClick}
     >
       <div className="col-span-6">
         <img
           src={coverImageUrl}
           alt={title}
-          className="w-full h-80 object-cover "
+          className="w-full h-80 object-cover"
         />
       </div>
       <div className="col-span-6">
@@ -28,9 +33,12 @@ const FeaturedRecipe = ({
           <h2 className="text-lg md:text-2xl font-bold mb-2 line-clamp-3">
             {title}
           </h2>
-          <p className="text-gray-700 text-[13px] mb-3 line-clamp-3">
+          <p className="text-gray-700 text-[13px] mb-4 line-clamp-3">
             {description}
           </p>
+
+
+
           <div className="flex items-center gap-4 mb-3 text-xs text-gray-600">
             {duration && (
               <span className="flex items-center gap-1">
@@ -42,6 +50,12 @@ const FeaturedRecipe = ({
               <span className="flex items-center gap-1">
                 <span>🥗</span>
                 {dietType}
+              </span>
+            )}
+            {averageRating > 0 && (
+              <span className="flex items-center gap-1">
+                <span>⭐</span>
+                {averageRating.toFixed(1)} ({ratingsCount})
               </span>
             )}
             {views > 0 && (
@@ -61,7 +75,7 @@ const FeaturedRecipe = ({
               </span>
             ))}
           </div>
-          <div className="flex items-center ">
+          <div className="flex items-center">
             <img
               src={authProfileImg}
               alt={authorName}
@@ -69,7 +83,7 @@ const FeaturedRecipe = ({
             />
             <div>
               <p className="text-gray-600 text-sm">{authorName}</p>
-              <p className="text-gray-50 text-xs">{updatedOn}</p>
+              <p className="text-gray-500 text-xs">{updatedOn}</p>
             </div>
           </div>
         </div>

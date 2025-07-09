@@ -123,6 +123,9 @@ const Recipes = () => {
               duration={recipe.duration}
               dietType={recipe.dietType}
               views={recipe.views}
+              averageRating={recipe.averageRating || 0}
+              ratingsCount={recipe.ratingsCount || 0}
+              recipeId={recipe._id}
               updatedOn={
                 recipe.updatedAt
                   ? moment(recipe.updatedAt).format("Do MMM YYYY")

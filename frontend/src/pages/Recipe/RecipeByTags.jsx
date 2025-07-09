@@ -69,6 +69,9 @@ const RecipeByTags = () => {
                     dietType={item.dietType}
                     views={item.views}
                     likes={item.likes}
+                    averageRating={item.averageRating || 0}
+                    ratingsCount={item.ratingsCount || 0}
+                    recipeId={item._id}
                     updatedOn={
                       item.updatedAt
                         ? moment(item.updatedAt).format("Do MMM YYYY")

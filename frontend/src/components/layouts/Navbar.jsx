@@ -21,7 +21,9 @@ const Navbar = ({ activeMenu }) => {
     if (!user) return;
 
     try {
-      const response = await axios.get(API_PATHS.NOTIFICATIONS.GET_UNREAD_COUNT);
+      const response = await axios.get(
+        API_PATHS.NOTIFICATIONS.GET_UNREAD_COUNT
+      );
       if (response.data.success) {
         setUnreadCount(response.data.unreadCount);
       }
@@ -85,7 +87,7 @@ const Navbar = ({ activeMenu }) => {
             <img
               src={LOGO}
               alt="logo"
-              className="h-[22px] sm:h-[24px] md:h-[26px]"
+              className="h-[28px] sm:h-[30px] md:h-[32px]"
             />
           </Link>
         </div>
