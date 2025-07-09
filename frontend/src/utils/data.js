@@ -5,6 +5,7 @@ import {
   LuLayoutTemplate,
   LuTag,
 } from "react-icons/lu";
+import { FaHeart, FaBookmark, FaUsers, FaShieldAlt } from "react-icons/fa";
 
 export const SIDE_MENU_DATA = [
   {
@@ -25,6 +26,18 @@ export const SIDE_MENU_DATA = [
     icon: LuMessageSquareQuote,
     path: "/admin/comments",
   },
+  {
+    id: "04",
+    label: "Kullanıcılar",
+    icon: FaUsers,
+    path: "/admin/users",
+  },
+  {
+    id: "05",
+    label: "Moderasyon",
+    icon: FaShieldAlt,
+    path: "/admin/moderation",
+  },
 ];
 
 export const BLOG_NAVBAR_DATA = [
@@ -33,5 +46,17 @@ export const BLOG_NAVBAR_DATA = [
     label: "Ana Sayfa",
     icon: LuLayoutTemplate,
     path: "/",
+  },
+  {
+    id: "02",
+    label: "Favorilerim",
+    icon: FaHeart,
+    path: "/favorites",
+  },
+  {
+    id: "03",
+    label: "Koleksiyonlarım",
+    icon: FaBookmark,
+    path: "/collections",
   },
 ];

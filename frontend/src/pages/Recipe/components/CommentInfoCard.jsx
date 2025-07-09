@@ -172,13 +172,13 @@ const CommentInfoCard = ({
                   <LuSave className="text-xs" />
                   Kaydet
                 </button>
-                                  <button
-                    onClick={handleCancelEdit}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-gray-600 bg-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-300 transition-all duration-200"
-                  >
-                    <LuX className="text-xs" />
-                    İptal
-                  </button>
+                <button
+                  onClick={handleCancelEdit}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-gray-600 bg-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-300 transition-all duration-200"
+                >
+                  <LuX className="text-xs" />
+                  İptal
+                </button>
               </div>
             </div>
           ) : (
@@ -190,22 +190,20 @@ const CommentInfoCard = ({
           {/* Actions */}
           {!isEditing && (
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Reply Button */}
-              {!isSubReply && (
-                <button
-                  className="inline-flex items-center gap-1 text-xs font-medium text-orange-600 bg-orange-50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full hover:bg-orange-500 hover:text-white transition-all duration-200"
-                  onClick={() => {
-                    if (!user) {
-                      setOpenAuthForm(true);
-                      return;
-                    }
-                    setShowReplyForm((prev) => !prev);
-                  }}
-                >
-                  <LuReply className="text-xs sm:text-sm" />
-                  <span className="hidden sm:inline">Yanıtla</span>
-                </button>
-              )}
+              {/* Reply Button - Now available for all comments */}
+              <button
+                className="inline-flex items-center gap-1 text-xs font-medium text-orange-600 bg-orange-50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full hover:bg-orange-500 hover:text-white transition-all duration-200"
+                onClick={() => {
+                  if (!user) {
+                    setOpenAuthForm(true);
+                    return;
+                  }
+                  setShowReplyForm((prev) => !prev);
+                }}
+              >
+                <LuReply className="text-xs sm:text-sm" />
+                <span className="hidden sm:inline">Yanıtla</span>
+              </button>
 
               {/* Show Replies Button */}
               {replies && replies.length > 0 && (
@@ -275,9 +273,9 @@ const CommentInfoCard = ({
         </div>
       )}
 
-      {/* Reply Form */}
-      {!isSubReply && showReplyForm && user && (
-        <div className="mt-4 ml-8 sm:ml-12">
+      {/* Reply Form - Now available for all comments */}
+      {showReplyForm && user && (
+        <div className="mt-4 ml-4 sm:ml-8">
           <CommentReplyInput
             user={user}
             authorName={authorName}
@@ -295,24 +293,25 @@ const CommentInfoCard = ({
       {showSubReplies && replies && replies.length > 0 && (
         <div className="mt-4 space-y-3">
           {replies.map((reply, index) => (
-            <CommentInfoCard
-              key={reply._id || index}
-              commentId={reply._id}
-              authorName={reply.author?.name || "Bilinmeyen"}
-              authorPhoto={reply.author?.profileImageUrl}
-              authorId={reply.author?._id || reply.author?.id}
-              content={reply.content}
-              post={reply.post || post}
-              replies={reply.replies || []}
-              isSubReply={true}
-              updatedOn={
-                reply.updatedAt
-                  ? moment(reply.updatedAt).format("Do MMM YYYY")
-                  : "-"
-              }
-              getAllComments={getAllComments}
-              onDelete={onDelete}
-            />
+            <div key={reply._id || index} className="ml-4 sm:ml-8">
+              <CommentInfoCard
+                commentId={reply._id}
+                authorName={reply.author?.name || "Bilinmeyen"}
+                authorPhoto={reply.author?.profileImageUrl}
+                authorId={reply.author?._id || reply.author?.id}
+                content={reply.content}
+                post={reply.post || post}
+                replies={reply.replies || []}
+                isSubReply={true}
+                updatedOn={
+                  reply.updatedAt
+                    ? moment(reply.updatedAt).format("Do MMM YYYY")
+                    : "-"
+                }
+                getAllComments={getAllComments}
+                onDelete={onDelete}
+              />
+            </div>
           ))}
         </div>
       )}

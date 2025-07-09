@@ -11,6 +11,12 @@ const recipeRoutes = require("./routes/recipesRoutes");
 const commentsRoutes = require("./routes/commentRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const aiRoutes = require("./routes/aiRoutes");
+const favoritesRoutes = require("./routes/favoritesRoutes");
+const ratingRoutes = require("./routes/ratingRoutes");
+const collectionRoutes = require("./routes/collectionRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const reportRoutes = require("./routes/reportRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 
@@ -18,7 +24,7 @@ const app = express();
 app.use(
   cors({
     origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -35,6 +41,12 @@ app.use("/api/recipes", recipeRoutes);
 app.use("/api/comments", commentsRoutes);
 app.use("/api/dashboard-summary", dashboardRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/favorites", favoritesRoutes);
+app.use("/api/ratings", ratingRoutes);
+app.use("/api/collections", collectionRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/report", reportRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Server Uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads"), {}));

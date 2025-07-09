@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 // Middleware to protect routes
-const protect = async (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   try {
     let token = req.headers.authorization;
 
@@ -19,4 +19,19 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+// Middleware to ensure only admins can access routes
+const adminOnly = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Bu işlem için admin yetkisi gerekli",
+    });
+  }
+  next();
+};
+
+// Support both default and named exports for backward compatibility
+module.exports = authMiddleware;
+module.exports.protect = authMiddleware;
+module.exports.authMiddleware = authMiddleware;
+module.exports.adminOnly = adminOnly;

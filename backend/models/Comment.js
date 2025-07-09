@@ -18,6 +18,26 @@ const CommentSchema = new mongoose.Schema(
       ref: "Comment",
       default: null,
     },
+    status: {
+      type: String,
+      enum: ["approved", "pending", "rejected"],
+      default: "approved",
+    },
+    flags: [
+      {
+        reason: { type: String, required: true },
+        reportedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        date: { type: Date, default: Date.now },
+      },
+    ],
+    rejectionReason: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

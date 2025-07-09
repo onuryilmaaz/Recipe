@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect, useState } from "react";
 import { LuDot } from "react-icons/lu";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
@@ -13,6 +13,9 @@ import CommentReplyInput from "../../components/Inputs/CommentReplyInput";
 import CommentInfoCard from "./components/CommentInfoCard";
 import toast from "react-hot-toast";
 import LikeCommentButton from "./components/LikeCommentButton";
+import FavoriteButton from "../../components/FavoriteButton";
+import StarRating from "../../components/StarRating";
+import CollectionSelector from "../../components/CollectionSelector";
 
 const RecipeView = () => {
   const { slug } = useParams();
@@ -109,6 +112,19 @@ const RecipeView = () => {
                 {blogPostData.title}
               </h1>
               <div className="flex items-center gap-1 flex-wrap mt-3 mb-5">
+                {blogPostData.author?._id ? (
+                  <Link
+                    to={`/user/${blogPostData.author._id}`}
+                    className="text-[13px] text-orange-600 font-medium hover:text-orange-700 underline"
+                  >
+                    {blogPostData.author.name}
+                  </Link>
+                ) : (
+                  <span className="text-[13px] text-orange-600 font-medium">
+                    Yönetici
+                  </span>
+                )}
+                <LuDot className="text-xl text-gray-400" />
                 <span className="text-[13px] text-gray-500 font-medium">
                   {moment(blogPostData.updatedAt || "").format("Do MMM YYYY")}
                 </span>
@@ -138,6 +154,22 @@ const RecipeView = () => {
 
               {/* Recipe Info */}
               <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-6">
+                {/* Rating Section */}
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-800">
+                    Bu tarifi değerlendir
+                  </h3>
+                  <StarRating
+                    recipeId={blogPostData._id}
+                    averageRating={blogPostData.averageRating || 0}
+                    ratingsCount={blogPostData.ratingsCount || 0}
+                    interactive={true}
+                    size="large"
+                    showCount={true}
+                    onRatingUpdate={fetchPostDetailsBySlug}
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   {blogPostData.duration && (
                     <div className="flex items-center gap-3">
@@ -220,7 +252,17 @@ const RecipeView = () => {
               </div>
 
               <div className="">
-                <ShareRecipe title={blogPostData.title} />
+                <div className="flex items-center gap-4 mb-6">
+                  <ShareRecipe title={blogPostData.title} />
+                  <FavoriteButton
+                    recipeId={blogPostData._id}
+                    className="bg-gray-100 hover:bg-gray-200 p-3"
+                  />
+                  <CollectionSelector
+                    recipeId={blogPostData._id}
+                    className="bg-gray-100 hover:bg-gray-200 p-3"
+                  />
+                </div>
 
                 {/* Comments Section */}
                 <div className="bg-gray-50 rounded-lg p-3 sm:p-4 lg:p-6">

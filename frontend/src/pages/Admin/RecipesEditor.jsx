@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import DashboardLayout from "../../components/layouts/DashboardLayout";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import {
   LuSave,
   LuSend,
@@ -22,10 +22,12 @@ import uploadImage from "../../utils/uploadImage";
 import toast from "react-hot-toast";
 import { getToastMessagesByType } from "../../utils/helper";
 import DeleteAlertContent from "../../components/DeleteAlertContent";
+import { UserContext } from "../../context/userContext";
 
 const RecipesEditor = ({ isEdit }) => {
   const navigate = useNavigate();
   const { recipeSlug = "" } = useParams();
+  const { user } = useContext(UserContext); // Get current user
 
   const [recipeData, setRecipeData] = useState({
     id: "",
@@ -248,6 +250,13 @@ const RecipesEditor = ({ isEdit }) => {
       if (response.data) {
         const data = response.data;
 
+        // Check if current user is the author of this recipe
+        if (data.author._id !== user?._id) {
+          toast.error("Bu tarifi düzenleme yetkiniz yok!");
+          navigate("/admin/recipes");
+          return;
+        }
+
         setRecipeData((prevState) => ({
           ...prevState,
           id: data._id,
@@ -267,6 +276,8 @@ const RecipesEditor = ({ isEdit }) => {
       }
     } catch (error) {
       console.error("Error:", error);
+      toast.error("Tarif yüklenemedi!");
+      navigate("/admin/recipes");
     }
   };
 

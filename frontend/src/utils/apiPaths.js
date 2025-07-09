@@ -5,6 +5,8 @@ export const API_PATHS = {
     REGISTER: "/api/auth/register",
     LOGIN: "/api/auth/login",
     GET_PROFILE: "/api/auth/profile",
+    UPDATE_PROFILE: "/api/auth/profile",
+    CHANGE_PASSWORD: "/api/auth/change-password",
   },
   IMAGE: {
     UPLOAD_IMAGE: "/api/auth/upload-image",
@@ -13,10 +15,8 @@ export const API_PATHS = {
     GET_DASHBOARD_DATA: "/api/dashboard-summary",
   },
   AI: {
-    GENERATE_BLOG_POST: "/api/ai/generate",
     GENERATE_FROM_INGREDIENTS: "/api/ai/generate-from-ingredients",
     GENERATE_FROM_TITLE: "/api/ai/generate-from-title",
-    GENERATE_POST_SUMMARY: "/api/ai/generate-post-summary",
     GENERATE_COMMENT_REPLY: "/api/ai/generate-comment-reply",
   },
   RECIPE: {
@@ -37,5 +37,34 @@ export const API_PATHS = {
     GET_ALL_BY_POST: (recipeId) => `/api/comments/${recipeId}`,
     UPDATE: (commentId) => `/api/comments/${commentId}`,
     DELETE: (commentId) => `/api/comments/${commentId}`,
+  },
+  FAVORITES: {
+    GET_ALL: "/api/favorites",
+    TOGGLE: (recipeId) => `/api/favorites/toggle/${recipeId}`,
+    CHECK: (recipeId) => `/api/favorites/check/${recipeId}`,
+  },
+  RATINGS: {
+    GET_ALL: (recipeId) => `/api/ratings/${recipeId}`,
+    ADD_UPDATE: (recipeId) => `/api/ratings/${recipeId}`,
+    GET_USER: (recipeId) => `/api/ratings/${recipeId}/user`,
+    DELETE: (recipeId) => `/api/ratings/${recipeId}`,
+  },
+  COLLECTIONS: {
+    CREATE: "/api/collections",
+    GET_MY: "/api/collections/my",
+    GET_PUBLIC: "/api/collections/public",
+    GET_BY_SLUG: (slug) => `/api/collections/${slug}`,
+    UPDATE: (id) => `/api/collections/${id}`,
+    DELETE: (id) => `/api/collections/${id}`,
+    ADD_RECIPE: (id, recipeId) => `/api/collections/${id}/recipes/${recipeId}`,
+    REMOVE_RECIPE: (id, recipeId) =>
+      `/api/collections/${id}/recipes/${recipeId}`,
+  },
+  NOTIFICATIONS: {
+    GET_ALL: "/api/notifications",
+    GET_UNREAD_COUNT: "/api/notifications/unread-count",
+    MARK_READ: (id) => `/api/notifications/${id}/read`,
+    MARK_ALL_READ: "/api/notifications/read-all",
+    DELETE: (id) => `/api/notifications/${id}`,
   },
 };

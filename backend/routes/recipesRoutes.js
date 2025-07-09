@@ -12,16 +12,7 @@ const {
   toggleLike,
   getTopRecipes,
 } = require("../controllers/recipeController.js");
-const { protect } = require("../middlewares/authMiddleware");
-
-// Admin-only middleware
-const adminOnly = (req, res, next) => {
-  if (req.user && req.user.role == "Admin") {
-    next();
-  } else {
-    res.status(403).json({ message: "Admin access only" });
-  }
-};
+const { protect, adminOnly } = require("../middlewares/authMiddleware");
 
 router.post("/", protect, adminOnly, createRecipe);
 router.get("/", getAllRecipes);

@@ -47,18 +47,17 @@ const createRecipe = async (req, res) => {
 
 // @desc   Update an existing recipe
 // @route  PUT /api/recipes/:id
-// @access Private (Author or Admin)
+// @access Private (Author Only)
 const updateRecipe = async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ message: "Recipe not found" });
-    if (
-      recipe.author.toString() !== req.user._id.toString() &&
-      !req.user.isAdmin
-    ) {
+
+    // Only the author can update their own recipe
+    if (recipe.author.toString() !== req.user._id.toString()) {
       return res
         .status(403)
-        .json({ message: "Not authorized to update this post" });
+        .json({ message: "Not authorized to update this recipe" });
     }
     const updatedData = req.body;
     if (updatedData.title) {
@@ -82,11 +81,18 @@ const updateRecipe = async (req, res) => {
 
 // @desc   Delete a recipe
 // @route  DELETE /api/recipes/:id
-// @access Private (Author or Admin)
+// @access Private (Author Only)
 const deleteRecipe = async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ message: "Recipe not found" });
+
+    // Only the author can delete their own recipe
+    if (recipe.author.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this recipe" });
+    }
 
     await recipe.deleteOne();
     res.json({ message: "Recipe deleted" });
@@ -96,11 +102,12 @@ const deleteRecipe = async (req, res) => {
 };
 
 // @desc   Get recipe by status (all,published or draft) and include counts
-// @route  GET /api/recipes?status=published|draft|all&page=1
+// @route  GET /api/recipes?status=published|draft|all&page=1&author=userId
 // @access Public
 const getAllRecipes = async (req, res) => {
   try {
     const status = req.query.status || "published";
+    const author = req.query.author; // Author filter for admin panel
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const skip = (page - 1) * limit;
@@ -110,6 +117,11 @@ const getAllRecipes = async (req, res) => {
     if (status === "published") filter.isDraft = false;
     else if (status === "draft") filter.isDraft = true;
 
+    // Add author filter if provided (for admin panel)
+    if (author) {
+      filter.author = author;
+    }
+
     // Fetch paginated recipes
     const recipes = await Recipe.find(filter)
       .populate("author", "name profileImageUrl")
@@ -118,12 +130,15 @@ const getAllRecipes = async (req, res) => {
       .limit(limit);
 
     // Count totals for pagination and tab counts
+    // If author filter is applied, count only that author's recipes
+    const baseCountFilter = author ? { author } : {};
+
     const [totalCount, allCount, publishedCount, draftCount] =
       await Promise.all([
         Recipe.countDocuments(filter),
-        Recipe.countDocuments(),
-        Recipe.countDocuments({ isDraft: false }),
-        Recipe.countDocuments({ isDraft: true }),
+        Recipe.countDocuments(baseCountFilter),
+        Recipe.countDocuments({ ...baseCountFilter, isDraft: false }),
+        Recipe.countDocuments({ ...baseCountFilter, isDraft: true }),
       ]);
 
     res.json({
@@ -173,17 +188,152 @@ const getRecipesByTags = async (req, res) => {
   }
 };
 
-// @desc   Search recipes by title or content
-// @route  GET /api/recipes/search?q=keyword
+// @desc   Advanced search recipes with filters
+// @route  GET /api/recipes/search?q=keyword&dietType=vegan&maxDuration=30&minRating=4&sortBy=rating&page=1
 // @access Public
 const searchRecipes = async (req, res) => {
   try {
-    const q = req.query.q;
-    const recipes = await Recipe.find({
-      isDraft: false,
-      $or: [{ title: { $regex: q, $options: "i" } }],
-    }).populate("author", "name profileImageUrl");
-    res.json(recipes);
+    const {
+      q = "",
+      dietType,
+      maxDuration,
+      minDuration,
+      minRating,
+      tags,
+      sortBy = "relevance",
+      page = 1,
+      limit = 12,
+    } = req.query;
+
+    // Build filter object
+    let filter = { isDraft: false };
+
+    // Text search in title, ingredients, and steps
+    if (q) {
+      filter.$or = [
+        { title: { $regex: q, $options: "i" } },
+        { "ingredients.name": { $regex: q, $options: "i" } },
+        { steps: { $regex: q, $options: "i" } },
+        { tags: { $regex: q, $options: "i" } },
+      ];
+    }
+
+    // Diet type filter
+    if (dietType) {
+      filter.dietType = { $regex: dietType, $options: "i" };
+    }
+
+    // Duration filters
+    if (maxDuration) {
+      filter.duration = { ...filter.duration, $lte: parseInt(maxDuration) };
+    }
+    if (minDuration) {
+      filter.duration = { ...filter.duration, $gte: parseInt(minDuration) };
+    }
+
+    // Rating filter
+    if (minRating) {
+      filter.averageRating = { $gte: parseFloat(minRating) };
+    }
+
+    // Tags filter (can search multiple tags)
+    if (tags) {
+      const tagArray = tags.split(",").map((tag) => tag.trim());
+      filter.tags = { $in: tagArray };
+    }
+
+    // Build sort object
+    let sort = {};
+    switch (sortBy) {
+      case "rating":
+        sort = { averageRating: -1, ratingsCount: -1 };
+        break;
+      case "newest":
+        sort = { createdAt: -1 };
+        break;
+      case "oldest":
+        sort = { createdAt: 1 };
+        break;
+      case "duration-asc":
+        sort = { duration: 1 };
+        break;
+      case "duration-desc":
+        sort = { duration: -1 };
+        break;
+      case "popular":
+        sort = { views: -1, likes: -1 };
+        break;
+      case "relevance":
+      default:
+        sort = { views: -1, averageRating: -1 };
+        break;
+    }
+
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Execute query
+    const [recipes, totalCount] = await Promise.all([
+      Recipe.find(filter)
+        .populate("author", "name profileImageUrl")
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Recipe.countDocuments(filter),
+    ]);
+
+    // Get filter statistics for frontend
+    const [dietTypes, tagStats, durationStats] = await Promise.all([
+      Recipe.distinct("dietType", { isDraft: false }),
+      Recipe.aggregate([
+        { $match: { isDraft: false } },
+        { $unwind: "$tags" },
+        { $group: { _id: "$tags", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 20 },
+      ]),
+      Recipe.aggregate([
+        { $match: { isDraft: false, duration: { $exists: true, $ne: null } } },
+        {
+          $group: {
+            _id: null,
+            minDuration: { $min: "$duration" },
+            maxDuration: { $max: "$duration" },
+            avgDuration: { $avg: "$duration" },
+          },
+        },
+      ]),
+    ]);
+
+    res.json({
+      recipes,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalCount,
+        totalPages: Math.ceil(totalCount / parseInt(limit)),
+        hasNext: totalCount > skip + parseInt(limit),
+        hasPrev: parseInt(page) > 1,
+      },
+      filters: {
+        dietTypes: dietTypes.filter((dt) => dt && dt.trim()),
+        tags: tagStats.map((tag) => ({ name: tag._id, count: tag.count })),
+        durationRange: durationStats[0] || {
+          minDuration: 0,
+          maxDuration: 120,
+          avgDuration: 30,
+        },
+      },
+      appliedFilters: {
+        q,
+        dietType,
+        maxDuration,
+        minDuration,
+        minRating,
+        tags,
+        sortBy,
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }

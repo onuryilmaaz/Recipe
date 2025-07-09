@@ -61,7 +61,7 @@ const Comments = () => {
                 ? moment(comment.updatedAt).format("Do MMM YYYY")
                 : "-"
             }
-            post={comment.post}
+            post={comment.recipe}
             replies={comment.replies || []}
             getAllComments={getAllComments}
             onDelete={(commentId) =>

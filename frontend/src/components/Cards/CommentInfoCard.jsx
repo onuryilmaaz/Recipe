@@ -74,31 +74,24 @@ const CommentInfoCard = ({
               </div>
               <p className="text-sm text-black font-medium">{content}</p>
               <div className="flex items-center gap-3 mt-1.5">
-                {!isSubReply && (
-                  <>
-                    <button
-                      className="flex items-center gap-2 text-[13px] font-medium text-sky-950 bg-sky-50 px-4 py-0.5 rounded-full hover:bg-sky-500 hover:text-white cursor-pointer"
-                      onClick={() =>
-                        setShowReplyForm((prevState) => !prevState)
-                      }
-                    >
-                      <LuReply />
-                      Reply
-                    </button>
-                    <button
-                      className="flex items-center gap-1.5 text-[13px] font-medium text-sky-950 bg-sky-50 px-4 py-0.5 rounded-full hover:bg-sky-500 hover:text-white cursor-pointer"
-                      onClick={() =>
-                        setShowSubReplies((prevState) => !prevState)
-                      }
-                    >
-                      {replies?.length || 0}{" "}
-                      {replies?.length == 1 ? "reply" : "replies"}{" "}
-                      <LuChevronDown
-                        className={`${showSubReplies ? "rotate-180" : ""}`}
-                      />
-                    </button>{" "}
-                  </>
-                )}
+                {/* Always show reply button */}
+                <button
+                  className="flex items-center gap-2 text-[13px] font-medium text-sky-950 bg-sky-50 px-4 py-0.5 rounded-full hover:bg-sky-500 hover:text-white cursor-pointer"
+                  onClick={() => setShowReplyForm((prevState) => !prevState)}
+                >
+                  <LuReply />
+                  Reply
+                </button>
+                <button
+                  className="flex items-center gap-1.5 text-[13px] font-medium text-sky-950 bg-sky-50 px-4 py-0.5 rounded-full hover:bg-sky-500 hover:text-white cursor-pointer"
+                  onClick={() => setShowSubReplies((prevState) => !prevState)}
+                >
+                  {replies?.length || 0}{" "}
+                  {replies?.length == 1 ? "reply" : "replies"}{" "}
+                  <LuChevronDown
+                    className={`${showSubReplies ? "rotate-180" : ""}`}
+                  />
+                </button>
                 <button
                   className="flex items-center gap-1.5 text-[13px] font-medium text-sky-950 bg-sky-50 px-4 py-0.5 rounded-full hover:bg-rose-500 hover:text-white cursor-pointer"
                   onClick={() => onDelete()}
@@ -112,9 +105,20 @@ const CommentInfoCard = ({
         {!isSubReply && (
           <div className="col-span-12 md:col-span-4 order-1 md:order-2 flex items-center gap-4">
             <img
-              src={post?.coverImageUrl}
+              src={
+                post?.coverImageUrl?.startsWith("http")
+                  ? post.coverImageUrl
+                  : post?.coverImageUrl
+                  ? `http://localhost:8080/uploads/${post.coverImageUrl
+                      .split("/")
+                      .pop()}`
+                  : "/default-recipe.jpg"
+              }
               alt="post cover"
               className="w-16 h-10 rounded-lg object-cover"
+              onError={(e) => {
+                e.target.src = "/default-recipe.jpg";
+              }}
             />
             <div className="flex-1">
               <div className="flex items-center gap-1">
@@ -126,7 +130,8 @@ const CommentInfoCard = ({
           </div>
         )}
       </div>
-      {!isSubReply && showReplyForm && (
+      {/* Reply Form - Now available for all comments */}
+      {showReplyForm && (
         <CommentReplyInput
           user={user}
           authorName={authorName}
@@ -145,7 +150,7 @@ const CommentInfoCard = ({
               authorName={comment.author.name}
               authorPhoto={comment.author.profileImageUrl}
               content={comment.content}
-              post={comment.post}
+              post={comment.recipe || comment.post}
               replies={comment.replies || []}
               isSubReply
               updatedOn={

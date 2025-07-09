@@ -8,13 +8,15 @@ import { API_PATHS } from "../../utils/apiPaths";
 import toast from "react-hot-toast";
 import moment from "moment";
 import Modal from "../../components/Modal";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Tabs from "../../components/Tabs";
 import RecipeSummaryCard from "../../components/Cards/RecipeSummaryCard";
 import DeleteAlertContent from "../../components/DeleteAlertContent";
+import { UserContext } from "../../context/userContext";
 
 const Recipes = () => {
   const navigate = useNavigate();
+  const { user } = useContext(UserContext); // Get current user
 
   const [tabs, setTabs] = useState([]);
   const [filterStatus, setFilterStatus] = useState("published");
@@ -34,6 +36,7 @@ const Recipes = () => {
         params: {
           status: filterStatus,
           page: pageNumber,
+          author: user?._id, // Only show current user's recipes
         },
       });
 

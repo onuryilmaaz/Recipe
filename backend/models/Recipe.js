@@ -18,7 +18,29 @@ const RecipeSchema = new mongoose.Schema(
     isDraft: { type: Boolean, default: false },
     views: { type: Number, default: 0 },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    averageRating: { type: Number, default: 0, min: 0, max: 5 },
+    ratingsCount: { type: Number, default: 0 },
     generatedByAI: { type: Boolean, default: false },
+    status: {
+      type: String,
+      enum: ["published", "pending", "rejected"],
+      default: "published",
+    },
+    flags: [
+      {
+        reason: { type: String, required: true },
+        reportedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        date: { type: Date, default: Date.now },
+      },
+    ],
+    rejectionReason: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

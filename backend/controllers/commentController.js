@@ -1,5 +1,6 @@
 const Comment = require("../models/Comment");
 const Recipe = require("../models/Recipe");
+const { recipeNotifications } = require("../utils/notificationService");
 
 // @desc   Add comment to a recipe
 // @route  POST /api/comments/:recipeId
@@ -23,6 +24,45 @@ const addComment = async (req, res) => {
     });
 
     await comment.populate("author", "name profileImageUrl");
+
+    // Send notifications
+    try {
+      if (parentComment) {
+        // Reply notification - notify the parent comment author
+        const parentCommentDoc = await Comment.findById(parentComment).populate(
+          "author"
+        );
+        if (
+          parentCommentDoc &&
+          parentCommentDoc.author._id.toString() !== req.user._id.toString()
+        ) {
+          await recipeNotifications.commentReplied(
+            parentCommentDoc.author._id,
+            req.user._id,
+            recipeId,
+            comment._id,
+            recipe.title,
+            req.user.name
+          );
+        }
+      } else {
+        // New comment notification - notify the recipe author
+        if (recipe.author.toString() !== req.user._id.toString()) {
+          await recipeNotifications.recipeCommented(
+            recipe.author,
+            req.user._id,
+            recipeId,
+            comment._id,
+            recipe.title,
+            req.user.name
+          );
+        }
+      }
+    } catch (notificationError) {
+      console.error("Error sending comment notification:", notificationError);
+      // Don't fail the comment creation if notification fails
+    }
+
     res.status(201).json(comment);
   } catch (error) {
     res
@@ -42,24 +82,23 @@ const getAllComments = async (req, res) => {
       .populate("recipe", "title coverImageUrl")
       .sort({ createdAt: 1 });
 
-    const commentMap = {};
-    comments.forEach((comment) => {
-      comment = comment.toObject();
-      comment.replies = [];
-      commentMap[comment._id] = comment;
-    });
+    // Recursive function to build nested comment structure
+    const buildNestedComments = (parentId = null) => {
+      return comments
+        .filter((comment) => {
+          const commentParentId = comment.parentComment
+            ? comment.parentComment.toString()
+            : null;
+          return commentParentId === parentId;
+        })
+        .map((comment) => {
+          const commentObj = comment.toObject();
+          commentObj.replies = buildNestedComments(comment._id.toString());
+          return commentObj;
+        });
+    };
 
-    const nestedComments = [];
-    comments.forEach((comment) => {
-      if (comment.parentComment) {
-        const parent = commentMap[comment.parentComment];
-        if (parent) {
-          parent.replies.push(commentMap[comment._id]);
-        }
-      } else {
-        nestedComments.push(commentMap[comment._id]);
-      }
-    });
+    const nestedComments = buildNestedComments();
     res.json(nestedComments);
   } catch (error) {
     res
@@ -80,25 +119,23 @@ const getCommentsByRecipe = async (req, res) => {
       .populate("recipe", "title coverImageUrl")
       .sort({ createdAt: 1 });
 
-    const commentMap = {};
-    comments.forEach((comment) => {
-      comment = comment.toObject();
-      comment.replies = [];
-      commentMap[comment._id] = comment;
-    });
+    // Recursive function to build nested comment structure
+    const buildNestedComments = (parentId = null) => {
+      return comments
+        .filter((comment) => {
+          const commentParentId = comment.parentComment
+            ? comment.parentComment.toString()
+            : null;
+          return commentParentId === parentId;
+        })
+        .map((comment) => {
+          const commentObj = comment.toObject();
+          commentObj.replies = buildNestedComments(comment._id.toString());
+          return commentObj;
+        });
+    };
 
-    const nestedComments = [];
-    comments.forEach((comment) => {
-      if (comment.parentComment) {
-        const parent = commentMap[comment.parentComment];
-        if (parent) {
-          parent.replies.push(commentMap[comment._id]);
-        }
-      } else {
-        nestedComments.push(commentMap[comment._id]);
-      }
-    });
-
+    const nestedComments = buildNestedComments();
     res.json(nestedComments);
   } catch (error) {
     res
